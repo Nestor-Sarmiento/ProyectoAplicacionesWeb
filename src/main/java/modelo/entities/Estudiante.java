@@ -2,6 +2,9 @@ package modelo.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -10,11 +13,12 @@ public class Estudiante extends Usuario {
 
 	private static final long serialVersionUID = 1L;
 
-	@Column(length = 50)
-	private String semestre;
+	@Column(nullable = false)
+	private int semestre;
 
-	@Column(length = 100)
-	private String carrera;
+	@ManyToOne(optional = false, fetch = FetchType.EAGER)
+	@JoinColumn(name = "carrera_id", nullable = false)
+	private Carrera carrera;
 
 	public Estudiante() {
 	}
@@ -23,19 +27,19 @@ public class Estudiante extends Usuario {
 		super(email, password, nombre, apellido);
 	}
 
-	public String getSemestre() {
+	public int getSemestre() {
 		return semestre;
 	}
 
-	public void setSemestre(String semestre) {
+	public void setSemestre(int semestre) {
 		this.semestre = semestre;
 	}
 
-	public String getCarrera() {
+	public Carrera getCarrera() {
 		return carrera;
 	}
 
-	public void setCarrera(String carrera) {
+	public void setCarrera(Carrera carrera) {
 		this.carrera = carrera;
 	}
 }

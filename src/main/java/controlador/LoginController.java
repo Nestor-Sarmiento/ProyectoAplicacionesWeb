@@ -8,10 +8,13 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import modelo.dao.CarreraDAO;
 import modelo.dao.UsuarioDAO;
+import modelo.entities.Carrera;
 import modelo.entities.Estudiante;
 import modelo.entities.Tutor;
 import modelo.entities.Usuario;
+import modelo.services.CatalogoSeeder;
 
 @WebServlet("/login")
 public class LoginController extends HttpServlet {
@@ -19,6 +22,7 @@ public class LoginController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	private final UsuarioDAO usuarioDAO = new UsuarioDAO();
+	private final CarreraDAO carreraDAO = new CarreraDAO();
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -44,7 +48,7 @@ public class LoginController extends HttpServlet {
 		switch (ruta) {
 			case "ingresar" -> ingresar(req, resp);
 			case "login" -> login(req, resp);
-			case "home" -> home(req, resp);
+			case "logout" -> logout(req, resp);
 			default -> resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Ruta no encontrada");
 		}
 	}
@@ -58,21 +62,28 @@ public class LoginController extends HttpServlet {
 	/** Datos de prueba si la BD está vacía (solo desarrollo). */
 	private void asegurarUsuariosPrueba() {
 		try {
+			CatalogoSeeder.asegurarCatalogo();
 			if (usuarioDAO.contar() > 0) {
 				return;
 			}
+
+			Carrera software = carreraDAO.buscarPorCodigo("SOFTWARE");
+			if (software == null) {
+				return;
+			}
+
 			Estudiante estudiante = new Estudiante(
 					"estudiante@epn.edu.ec", "12345678", "Ana", "Pérez");
-			estudiante.setCarrera("Ingeniería en Sistemas");
-			estudiante.setSemestre("Sexto");
+			estudiante.setCarrera(software);
+			estudiante.setSemestre(6);
 			usuarioDAO.guardar(estudiante);
 
 			Tutor tutor = new Tutor(
 					"tutor@epn.edu.ec", "12345678", "Luis", "Gómez");
-			tutor.setMaterias("Cálculo, Programación");
+			tutor.setCarrera(software);
+			tutor.setSemestre(5);
 			usuarioDAO.guardar(tutor);
 		} catch (RuntimeException e) {
-			// Si la BD no está lista, el login mostrará error al autenticar.
 			getServletContext().log("No se pudieron crear usuarios de prueba", e);
 		}
 	}
@@ -98,30 +109,23 @@ public class LoginController extends HttpServlet {
 		HttpSession session = req.getSession(true);
 		session.setAttribute("usuario", usuario);
 
-		resp.sendRedirect(req.getContextPath() + "/login?ruta=home");
+		if (usuario instanceof Estudiante) {
+			resp.sendRedirect(req.getContextPath() + "/estudiante?ruta=inicio");
+		} else if (usuario instanceof Tutor) {
+			resp.sendRedirect(req.getContextPath() + "/tutor?ruta=inicio");
+		} else {
+			session.invalidate();
+			req.setAttribute("error", "Tipo de usuario no soportado.");
+			ingresar(req, resp);
+		}
 	}
 
-	private void home(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
+	private void logout(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		HttpSession session = req.getSession(false);
-		Usuario usuario = session == null ? null : (Usuario) session.getAttribute("usuario");
-
-		if (usuario == null) {
-			resp.sendRedirect(req.getContextPath() + "/login?ruta=ingresar");
-			return;
+		if (session != null) {
+			session.invalidate();
 		}
-
-		req.setAttribute("usuario", usuario);
-
-		if (usuario instanceof Estudiante) {
-			req.setAttribute("tipoUsuario", "Estudiante");
-		} else if (usuario instanceof Tutor) {
-			req.setAttribute("tipoUsuario", "Tutor");
-		} else {
-			req.setAttribute("tipoUsuario", "Usuario");
-		}
-
-		req.getRequestDispatcher("/vista/home.jsp").forward(req, resp);
+		resp.sendRedirect(req.getContextPath() + "/login?ruta=ingresar");
 	}
 
 	private String trim(String value) {

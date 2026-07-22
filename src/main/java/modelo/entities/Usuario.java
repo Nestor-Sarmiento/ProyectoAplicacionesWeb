@@ -28,11 +28,17 @@ public abstract class Usuario implements Serializable {
 	@Column(nullable = false, length = 255)
 	private String password;
 
-	@Column(nullable = false, length = 100)
+	@Column(name = "primer_nombre", nullable = false, length = 100)
 	private String nombre;
 
-	@Column(nullable = false, length = 100)
+	@Column(name = "segundo_nombre", length = 100)
+	private String segundoNombre;
+
+	@Column(name = "primer_apellido", nullable = false, length = 100)
 	private String apellido;
+
+	@Column(name = "segundo_apellido", length = 100)
+	private String segundoApellido;
 
 	@Column(nullable = false)
 	private boolean activo = true;
@@ -79,12 +85,28 @@ public abstract class Usuario implements Serializable {
 		this.nombre = nombre;
 	}
 
+	public String getSegundoNombre() {
+		return segundoNombre;
+	}
+
+	public void setSegundoNombre(String segundoNombre) {
+		this.segundoNombre = segundoNombre;
+	}
+
 	public String getApellido() {
 		return apellido;
 	}
 
 	public void setApellido(String apellido) {
 		this.apellido = apellido;
+	}
+
+	public String getSegundoApellido() {
+		return segundoApellido;
+	}
+
+	public void setSegundoApellido(String segundoApellido) {
+		this.segundoApellido = segundoApellido;
 	}
 
 	public boolean isActivo() {
@@ -96,6 +118,14 @@ public abstract class Usuario implements Serializable {
 	}
 
 	public String getNombreCompleto() {
-		return nombre + " " + apellido;
+		StringBuilder sb = new StringBuilder(nombre);
+		if (segundoNombre != null && !segundoNombre.isBlank()) {
+			sb.append(' ').append(segundoNombre.trim());
+		}
+		sb.append(' ').append(apellido);
+		if (segundoApellido != null && !segundoApellido.isBlank()) {
+			sb.append(' ').append(segundoApellido.trim());
+		}
+		return sb.toString();
 	}
 }
