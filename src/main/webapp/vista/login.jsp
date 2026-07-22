@@ -70,12 +70,13 @@
                     <span id="errorValidacionLoginMsg"></span>
                 </div>
 
-                <%-- POST al controlador; la autenticación se agregará después --%>
+                <%-- POST /login?ruta=login --%>
                 <form action="${pageContext.request.contextPath}/login"
                       method="post"
                       id="formLogin"
                       class="space-y-5"
                       novalidate>
+                    <input type="hidden" name="ruta" value="login"/>
 
                     <div class="space-y-1.5">
                         <label class="text-xs font-semibold text-primary uppercase tracking-wider ml-1" for="email">
