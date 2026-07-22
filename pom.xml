@@ -17,6 +17,22 @@
         <artifactId>maven-war-plugin</artifactId>
         <version>3.2.3</version>
       </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.5.0</version>
+        <configuration>
+          <!-- exec:java runs in-process and breaks Tomcat/Jasper's classloader
+               delegation (JspServlet ClassNotFoundException). Use exec:exec,
+               which forks a real "java" process, for JSP support to work. -->
+          <executable>java</executable>
+          <arguments>
+            <argument>-cp</argument>
+            <classpath/>
+            <argument>Main</argument>
+          </arguments>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
   
@@ -62,6 +78,19 @@
       <artifactId>jersey-media-json-jackson</artifactId>
       <version>3.1.5</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.eclipse.persistence</groupId>
+      <artifactId>eclipselink</artifactId>
+      <version>4.0.6</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.sun.xml.bind</groupId>
+          <artifactId>jaxb-xjc</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+   
   </dependencies>
   
 </project>
