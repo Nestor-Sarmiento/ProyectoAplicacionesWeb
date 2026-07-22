@@ -16,15 +16,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import modelo.dao.AsignaturaDAO;
-import modelo.dao.DisponibilidadDAO;
-import modelo.dao.SolicitudDAO;
 import modelo.dao.TutorDAO;
 import modelo.entities.Asignatura;
 import modelo.entities.EstadoSolicitud;
 import modelo.entities.SolicitudTutoria;
 import modelo.entities.Tutor;
 import modelo.entities.Usuario;
+import modelo.services.DisponibilidadService;
 import modelo.services.LlamadaService;
+import modelo.services.SolicitudService;
+import modelo.services.TutorService;
 import util.EnvLoader;
 
 @WebServlet("/tutor")
@@ -32,10 +33,11 @@ public class TutorController extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
-	private final DisponibilidadDAO disponibilidadDAO = new DisponibilidadDAO();
+	private final DisponibilidadService disponibilidadService = new DisponibilidadService();
 	private final TutorDAO tutorDAO = new TutorDAO();
+	private final TutorService tutorService = new TutorService();
 	private final AsignaturaDAO asignaturaDAO = new AsignaturaDAO();
-	private final SolicitudDAO solicitudDAO = new SolicitudDAO();
+	private final SolicitudService solicitudService = new SolicitudService();
 	private final LlamadaService llamadaService = new LlamadaService();
 
 	static {
@@ -96,7 +98,7 @@ public class TutorController extends HttpServlet {
 						.comparingInt(Asignatura::getSemestre)
 						.thenComparing(Asignatura::getCodigo))
 				.toList());
-		List<SolicitudTutoria> proximas = solicitudDAO.listarProximasSesionesTutor(tutor.getId());
+		List<SolicitudTutoria> proximas = solicitudService.listarProximasSesionesTutor(tutor.getId());
 		req.setAttribute("proximasSesiones", proximas);
 		req.setAttribute("enlacesUnirse", llamadaService.mapearEnlacesUnirse(proximas, true));
 		req.getRequestDispatcher("/vista/tutor/dashboard.jsp").forward(req, resp);
@@ -110,7 +112,7 @@ public class TutorController extends HttpServlet {
 		}
 
 		req.setAttribute("tutor", tutor);
-		req.setAttribute("slotsSeleccionados", disponibilidadDAO.slotsComoCadena(tutor.getId()));
+		req.setAttribute("slotsSeleccionados", disponibilidadService.slotsComoCadena(tutor.getId()));
 
 		if ("ok".equals(req.getParameter("mensaje"))) {
 			req.setAttribute("mensaje", "Disponibilidad guardada correctamente.");
@@ -135,7 +137,7 @@ public class TutorController extends HttpServlet {
 		}
 
 		try {
-			disponibilidadDAO.reemplazarSlots(tutor.getId(), slots.trim());
+			disponibilidadService.reemplazarSlots(tutor.getId(), slots.trim());
 			HttpSession session = req.getSession(false);
 			if (session != null) {
 				session.removeAttribute("horariosTemporales");
@@ -211,7 +213,7 @@ public class TutorController extends HttpServlet {
 		}
 
 		try {
-			tutorDAO.reemplazarMaterias(tutor.getId(), ids);
+			tutorService.reemplazarMaterias(tutor.getId(), ids);
 			Tutor actualizado = tutorDAO.buscarPorIdConMaterias(tutor.getId());
 			if (actualizado != null) {
 				req.getSession(true).setAttribute("usuario", actualizado);
@@ -236,7 +238,7 @@ public class TutorController extends HttpServlet {
 		}
 
 		req.setAttribute("tutor", tutor);
-		List<SolicitudTutoria> solicitudes = solicitudDAO.listarPorTutor(tutor.getId());
+		List<SolicitudTutoria> solicitudes = solicitudService.listarPorTutor(tutor.getId());
 		req.setAttribute("solicitudes", solicitudes);
 		req.setAttribute("enlacesUnirse", llamadaService.mapearEnlacesUnirse(solicitudes, true));
 
@@ -286,7 +288,7 @@ public class TutorController extends HttpServlet {
 		}
 
 		try {
-			SolicitudTutoria solicitud = solicitudDAO.actualizarEstado(
+			SolicitudTutoria solicitud = solicitudService.responderSolicitud(
 					solicitudId, tutor.getId(), nuevoEstado);
 
 			if (nuevoEstado == EstadoSolicitud.ACEPTADA) {
@@ -342,7 +344,7 @@ public class TutorController extends HttpServlet {
 		}
 
 		try {
-			solicitudDAO.cancelarPorTutor(solicitudId, tutor.getId());
+			solicitudService.cancelarPorTutor(solicitudId, tutor.getId());
 			resp.sendRedirect(redirect + "&mensaje=ok");
 		} catch (IllegalArgumentException | IllegalStateException e) {
 			resp.sendRedirect(redirect + "&error="

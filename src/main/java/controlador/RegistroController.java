@@ -12,12 +12,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import modelo.dao.AsignaturaDAO;
 import modelo.dao.CarreraDAO;
-import modelo.dao.UsuarioDAO;
 import modelo.entities.Asignatura;
 import modelo.entities.Carrera;
 import modelo.entities.Estudiante;
 import modelo.entities.Tutor;
 import modelo.services.CatalogoSeeder;
+import modelo.services.UsuarioService;
 
 @WebServlet("/registro")
 public class RegistroController extends HttpServlet {
@@ -26,7 +26,7 @@ public class RegistroController extends HttpServlet {
 
 	private final CarreraDAO carreraDAO = new CarreraDAO();
 	private final AsignaturaDAO asignaturaDAO = new AsignaturaDAO();
-	private final UsuarioDAO usuarioDAO = new UsuarioDAO();
+	private final UsuarioService usuarioService = new UsuarioService();
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -94,7 +94,7 @@ public class RegistroController extends HttpServlet {
 			return;
 		}
 
-		if (usuarioDAO.buscarPorEmail(email) != null) {
+		if (usuarioService.existeEmail(email)) {
 			req.setAttribute("error", "Ya existe una cuenta con ese correo.");
 			mostrar(req, resp);
 			return;
@@ -121,7 +121,7 @@ public class RegistroController extends HttpServlet {
 				estudiante.setSegundoApellido(blankToNull(segundoApellido));
 				estudiante.setSemestre(semestre);
 				estudiante.setCarrera(carrera);
-				usuarioDAO.guardar(estudiante);
+				usuarioService.registrar(estudiante);
 			} else if ("TUTOR".equals(tipo)) {
 				if (semestre < 2 || semestre > 9) {
 					req.setAttribute("error", "El semestre del tutor debe ser entre 2do y 9no.");
@@ -149,7 +149,7 @@ public class RegistroController extends HttpServlet {
 				tutor.setSemestre(semestre);
 				tutor.setCarrera(carrera);
 				tutor.setMaterias(materias);
-				usuarioDAO.guardar(tutor);
+				usuarioService.registrar(tutor);
 			} else {
 				req.setAttribute("error", "Tipo de cuenta no válido.");
 				mostrar(req, resp);
