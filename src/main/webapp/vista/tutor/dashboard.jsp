@@ -164,24 +164,45 @@
 
         <section class="bg-surface-container-lowest rounded-xl p-8
                         shadow-[0_20px_40px_rgba(25,28,30,0.08)]">
-            <h2 class="text-xl font-extrabold text-on-surface mb-6 flex items-center gap-2"
-                style="font-family:'Manrope',sans-serif">
-                <span class="material-symbols-outlined text-primary">calendar_today</span>
-                Próximas sesiones
-            </h2>
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+                <h2 class="text-xl font-extrabold text-on-surface flex items-center gap-2"
+                    style="font-family:'Manrope',sans-serif">
+                    <span class="material-symbols-outlined text-primary">calendar_today</span>
+                    Próximas sesiones
+                </h2>
+                <a href="${pageContext.request.contextPath}/tutor?ruta=solicitudes"
+                   class="text-sm font-bold text-primary hover:underline inline-flex items-center gap-1">
+                    Ver solicitudes
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                </a>
+            </div>
 
             <c:choose>
-                <c:when test="${not empty sesiones}">
+                <c:when test="${not empty proximasSesiones}">
                     <div class="space-y-4">
-                        <c:forEach var="sesion" items="${sesiones}">
-                            <div class="flex justify-between items-center p-4 border border-outline-variant/40 rounded-lg">
+                        <c:forEach var="sesion" items="${proximasSesiones}">
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3
+                                        p-4 border border-outline-variant/40 rounded-lg">
                                 <div>
-                                    <h3 class="font-bold text-on-surface"><c:out value="${sesion.nombreEstudiante}"/></h3>
-                                    <p class="text-sm text-on-surface-variant"><c:out value="${sesion.tema}"/></p>
+                                    <h3 class="font-bold text-on-surface">
+                                        <c:out value="${sesion.estudiante.nombreCompleto}"/>
+                                    </h3>
+                                    <p class="text-sm text-on-surface-variant">
+                                        <c:out value="${sesion.asignatura.codigo}"/>
+                                        — <c:out value="${sesion.asignatura.nombre}"/>
+                                    </p>
                                 </div>
-                                <div class="text-right">
-                                    <p class="font-bold text-sm"><c:out value="${sesion.fecha}"/></p>
-                                    <p class="text-xs text-outline"><c:out value="${sesion.duracion}"/></p>
+                                <div class="sm:text-right">
+                                    <p class="font-bold text-sm text-on-surface">
+                                        <c:out value="${sesion.fechaSesion}"/>
+                                    </p>
+                                    <c:if test="${not empty sesion.disponibilidad}">
+                                        <p class="text-xs text-outline">
+                                            <c:out value="${sesion.disponibilidad.diaSemana.etiqueta}"/>
+                                            · <c:out value="${sesion.disponibilidad.horaInicio}"/>
+                                            – <c:out value="${sesion.disponibilidad.horaFin}"/>
+                                        </p>
+                                    </c:if>
                                 </div>
                             </div>
                         </c:forEach>
@@ -190,6 +211,7 @@
                 <c:otherwise>
                     <p class="text-on-surface-variant text-center py-8 text-sm">
                         No hay sesiones programadas próximamente.
+                        Cuando aceptes una solicitud, aparecerá aquí.
                     </p>
                 </c:otherwise>
             </c:choose>
