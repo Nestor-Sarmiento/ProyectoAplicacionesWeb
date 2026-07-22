@@ -70,7 +70,7 @@ La búsqueda del tutor (con o sin filtro de materia) corresponde a casos de uso 
 ### 4.1 — Datos incompletos
 
 4.1.1. En el paso 4, falta materia, horario, fecha o mensaje.  
-4.1.2. El sistema muestra *«Completa materia, horario y mensaje para continuar.»*  
+4.1.2. El sistema muestra un mensaje de error.  
 4.1.3. El flujo regresa al paso 3.
 
 ### 4.2 — Mensaje inválido
@@ -104,20 +104,101 @@ Estudiante --> CU07
 Estudiante --> CU08
 Tutor --> CU10
 
-CU08 ..> CU07 : <<precede>>
-CU10 ..> CU08 : <<precede>>
+@enduml
+```
 
-note right of CU08
-  Actor principal: Estudiante
-  El Tutor no interactúa en este CU;
-  la solicitud queda Pendiente
-  hasta CU-10
-end note
+## Modelo de dominio
 
-note bottom of CU07
-  Precondición de CU-08:
-  el estudiante ya visualiza el perfil
-end note
+```plantuml
+@startuml OwlShare-ModeloDominio
+skinparam backgroundColor white
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor white
+  BorderColor black
+  ArrowColor black
+}
+hide circle
+hide empty methods
+
+abstract class Usuario {
+  email
+  nombre
+  apellido
+  activo
+}
+
+class Estudiante {
+  semestre
+}
+
+class Tutor {
+  semestre
+}
+
+class Carrera {
+  codigo
+  nombre
+}
+
+class Asignatura {
+  codigo
+  nombre
+  semestre
+}
+
+class Disponibilidad {
+  diaSemana
+  horaInicio
+  horaFin
+  activo
+}
+
+class SolicitudTutoria {
+  fechaSesion
+  mensaje
+  fechaCreacion
+}
+
+abstract class EstadoSolicitud
+
+class Pendiente
+class Aceptada
+class Rechazada
+class Cancelada
+
+class SesionTutoria {
+  completada
+  calificacion
+  comentario
+}
+
+Usuario <|-- Estudiante
+Usuario <|-- Tutor
+
+EstadoSolicitud <|-- Pendiente
+EstadoSolicitud <|-- Aceptada
+EstadoSolicitud <|-- Rechazada
+EstadoSolicitud <|-- Cancelada
+
+Carrera "1" o-- "1..*" Asignatura : contiene >
+
+Estudiante "*" --> "1" Carrera : pertenece a >
+Tutor "*" --> "1" Carrera : pertenece a >
+
+Tutor "0..*" -- "1..*" Asignatura : dicta >
+Tutor "1" o-- "0..*" Disponibilidad : ofrece >
+
+Estudiante "1" --> "*" SolicitudTutoria : realiza >
+Tutor "1" --> "*" SolicitudTutoria : recibe >
+Asignatura "1" --> "*" SolicitudTutoria : es solicitada en >
+Disponibilidad "1" --> "*" SolicitudTutoria : es usada en >
+
+SolicitudTutoria "*" --> "1" EstadoSolicitud : se encuentra en >
+
+SolicitudTutoria "1" --> "0..1" SesionTutoria : genera >
+SesionTutoria "*" --> "1" Tutor : involucra a >
+SesionTutoria "*" --> "1" Estudiante : involucra a >
 
 @enduml
 ```
