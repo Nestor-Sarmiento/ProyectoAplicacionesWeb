@@ -68,6 +68,7 @@ public class EstudianteController extends HttpServlet {
 			case "detalle-tutor" -> detalleTutor(req, resp);
 			case "solicitar-tutoria" -> mostrarSolicitarTutoria(req, resp);
 			case "enviar-solicitud" -> enviarSolicitud(req, resp);
+			case "solicitudes" -> solicitudes(req, resp);
 			default -> resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Ruta no encontrada");
 		}
 	}
@@ -80,7 +81,21 @@ public class EstudianteController extends HttpServlet {
 		}
 
 		req.setAttribute("estudiante", estudiante);
+		req.setAttribute("proximasSesiones",
+				solicitudDAO.listarProximasSesionesEstudiante(estudiante.getId()));
 		req.getRequestDispatcher("/vista/estudiante/dashboard.jsp").forward(req, resp);
+	}
+
+	private void solicitudes(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		Estudiante estudiante = requerirEstudiante(req, resp);
+		if (estudiante == null) {
+			return;
+		}
+
+		req.setAttribute("estudiante", estudiante);
+		req.setAttribute("solicitudes", solicitudDAO.listarPorEstudiante(estudiante.getId()));
+		req.getRequestDispatcher("/vista/estudiante/solicitudes.jsp").forward(req, resp);
 	}
 
 	private void buscarTutor(HttpServletRequest req, HttpServletResponse resp)

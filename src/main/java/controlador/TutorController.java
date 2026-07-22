@@ -87,6 +87,8 @@ public class TutorController extends HttpServlet {
 						.comparingInt(Asignatura::getSemestre)
 						.thenComparing(Asignatura::getCodigo))
 				.toList());
+		req.setAttribute("proximasSesiones",
+				solicitudDAO.listarProximasSesionesTutor(tutor.getId()));
 		req.getRequestDispatcher("/vista/tutor/dashboard.jsp").forward(req, resp);
 	}
 

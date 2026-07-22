@@ -101,4 +101,13 @@ public class UsuarioDAO {
 			em.close();
 		}
 	}
+
+	public Optional<Usuario> buscarPorId(Long id) {
+        if (id == null) {
+            return Optional.empty();
+        }
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return Optional.ofNullable(session.get(Usuario.class, id));
+        }
+    }
 }
