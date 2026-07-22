@@ -67,3 +67,11 @@ Thumbs.db
 
 
 .env
+
+# Dependencias bloqueadas
+pom.xml
+
+# Clase principal para sistema embebido
+Main.java
+
+*.cmd
