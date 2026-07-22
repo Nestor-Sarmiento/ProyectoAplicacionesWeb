@@ -1,9 +1,16 @@
 package modelo.dao;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 import modelo.conexion.JPAUtil;
+import modelo.entities.Asignatura;
+import modelo.entities.Carrera;
+import modelo.entities.Estudiante;
+import modelo.entities.Tutor;
 import modelo.entities.Usuario;
 
 public class UsuarioDAO {
@@ -65,6 +72,24 @@ public class UsuarioDAO {
 		EntityManager em = JPAUtil.getEntityManager();
 		try {
 			em.getTransaction().begin();
+
+			if (usuario instanceof Estudiante estudiante && estudiante.getCarrera() != null) {
+				estudiante.setCarrera(em.getReference(Carrera.class, estudiante.getCarrera().getId()));
+			}
+
+			if (usuario instanceof Tutor tutor) {
+				if (tutor.getCarrera() != null) {
+					tutor.setCarrera(em.getReference(Carrera.class, tutor.getCarrera().getId()));
+				}
+				if (tutor.getMaterias() != null && !tutor.getMaterias().isEmpty()) {
+					Set<Asignatura> refs = new HashSet<>();
+					for (Asignatura materia : tutor.getMaterias()) {
+						refs.add(em.getReference(Asignatura.class, materia.getId()));
+					}
+					tutor.setMaterias(refs);
+				}
+			}
+
 			em.persist(usuario);
 			em.getTransaction().commit();
 		} catch (RuntimeException e) {

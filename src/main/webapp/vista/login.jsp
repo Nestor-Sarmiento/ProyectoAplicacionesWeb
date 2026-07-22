@@ -131,7 +131,7 @@
                 <div class="text-center pt-2">
                     <p class="text-sm text-slate-500">
                         ¿No tienes una cuenta?
-                        <a href="${pageContext.request.contextPath}/registro"
+                        <a href="${pageContext.request.contextPath}/registro?ruta=mostrar"
                            class="text-primary font-bold hover:underline">Regístrate aquí</a>
                     </p>
                 </div>

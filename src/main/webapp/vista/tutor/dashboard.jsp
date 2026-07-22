@@ -52,10 +52,16 @@
             <p class="text-on-surface-variant text-base">
                 Bienvenido, <c:out value="${tutor.nombre}"/>. Gestiona tus horarios y solicitudes de tutoría.
             </p>
-            <c:if test="${not empty tutor.materias}">
-                <p class="mt-3 text-sm text-outline inline-flex items-center gap-1">
-                    <span class="material-symbols-outlined text-sm">menu_book</span>
-                    <c:out value="${tutor.materias}"/>
+            <c:if test="${not empty tutor.carrera}">
+                <p class="mt-3 text-sm text-outline">
+                    <span class="inline-flex items-center gap-1 mr-3">
+                        <span class="material-symbols-outlined text-sm">school</span>
+                        <c:out value="${tutor.carrera.nombre}"/>
+                    </span>
+                    <span class="inline-flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">calendar_month</span>
+                        Semestre <c:out value="${tutor.semestre}"/>
+                    </span>
                 </p>
             </c:if>
         </div>

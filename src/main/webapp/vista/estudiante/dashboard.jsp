@@ -52,20 +52,16 @@
             <p class="text-on-surface-variant text-base">
                 Bienvenido a tu espacio de aprendizaje colaborativo.
             </p>
-            <c:if test="${not empty estudiante.carrera or not empty estudiante.semestre}">
+            <c:if test="${not empty estudiante.carrera}">
                 <p class="mt-3 text-sm text-outline">
-                    <c:if test="${not empty estudiante.carrera}">
-                        <span class="inline-flex items-center gap-1 mr-3">
-                            <span class="material-symbols-outlined text-sm">school</span>
-                            <c:out value="${estudiante.carrera}"/>
-                        </span>
-                    </c:if>
-                    <c:if test="${not empty estudiante.semestre}">
-                        <span class="inline-flex items-center gap-1">
-                            <span class="material-symbols-outlined text-sm">calendar_month</span>
-                            <c:out value="${estudiante.semestre}"/>
-                        </span>
-                    </c:if>
+                    <span class="inline-flex items-center gap-1 mr-3">
+                        <span class="material-symbols-outlined text-sm">school</span>
+                        <c:out value="${estudiante.carrera.nombre}"/>
+                    </span>
+                    <span class="inline-flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">calendar_month</span>
+                        Semestre <c:out value="${estudiante.semestre}"/>
+                    </span>
                 </p>
             </c:if>
         </div>

@@ -8,10 +8,13 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import modelo.dao.CarreraDAO;
 import modelo.dao.UsuarioDAO;
+import modelo.entities.Carrera;
 import modelo.entities.Estudiante;
 import modelo.entities.Tutor;
 import modelo.entities.Usuario;
+import modelo.services.CatalogoSeeder;
 
 @WebServlet("/login")
 public class LoginController extends HttpServlet {
@@ -19,6 +22,7 @@ public class LoginController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	private final UsuarioDAO usuarioDAO = new UsuarioDAO();
+	private final CarreraDAO carreraDAO = new CarreraDAO();
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -58,21 +62,28 @@ public class LoginController extends HttpServlet {
 	/** Datos de prueba si la BD está vacía (solo desarrollo). */
 	private void asegurarUsuariosPrueba() {
 		try {
+			CatalogoSeeder.asegurarCatalogo();
 			if (usuarioDAO.contar() > 0) {
 				return;
 			}
+
+			Carrera software = carreraDAO.buscarPorCodigo("SOFTWARE");
+			if (software == null) {
+				return;
+			}
+
 			Estudiante estudiante = new Estudiante(
 					"estudiante@epn.edu.ec", "12345678", "Ana", "Pérez");
-			estudiante.setCarrera("Ingeniería en Sistemas");
-			estudiante.setSemestre("Sexto");
+			estudiante.setCarrera(software);
+			estudiante.setSemestre(6);
 			usuarioDAO.guardar(estudiante);
 
 			Tutor tutor = new Tutor(
 					"tutor@epn.edu.ec", "12345678", "Luis", "Gómez");
-			tutor.setMaterias("Cálculo, Programación");
+			tutor.setCarrera(software);
+			tutor.setSemestre(5);
 			usuarioDAO.guardar(tutor);
 		} catch (RuntimeException e) {
-			// Si la BD no está lista, el login mostrará error al autenticar.
 			getServletContext().log("No se pudieron crear usuarios de prueba", e);
 		}
 	}
