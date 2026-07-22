@@ -1,5 +1,7 @@
 package modelo.entities;
 
+import java.time.DayOfWeek;
+
 public enum DiaSemana {
 	LUNES("Lunes"),
 	MARTES("Martes"),
@@ -17,6 +19,17 @@ public enum DiaSemana {
 
 	public String getEtiqueta() {
 		return etiqueta;
+	}
+
+	public DayOfWeek toDayOfWeek() {
+		return DayOfWeek.of(ordinal() + 1);
+	}
+
+	public static DiaSemana from(DayOfWeek dayOfWeek) {
+		if (dayOfWeek == null) {
+			throw new IllegalArgumentException("Día obligatorio.");
+		}
+		return DiaSemana.values()[dayOfWeek.getValue() - 1];
 	}
 
 	public static DiaSemana parse(String valor) {

@@ -86,4 +86,62 @@ public class TutorDAO {
 			em.close();
 		}
 	}
+
+	public List<Tutor> buscar(Long carreraId, Long asignaturaId) {
+		return buscar(carreraId, asignaturaId, null);
+	}
+
+	/**
+	 * Busca tutores activos. Si {@code asignaturaId} está definido, filtra por esa materia.
+	 * Si no, y {@code semestreMax} está definido, incluye tutores que dicten al menos
+	 * una materia de la carrera con semestre &lt;= semestreMax.
+	 */
+	public List<Tutor> buscar(Long carreraId, Long asignaturaId, Integer semestreMax) {
+		EntityManager em = JPAUtil.getEntityManager();
+		try {
+			StringBuilder jpql = new StringBuilder(
+					"SELECT DISTINCT t.id FROM Tutor t");
+			boolean joinMaterias = asignaturaId != null
+					|| (asignaturaId == null && semestreMax != null);
+			if (joinMaterias) {
+				jpql.append(" JOIN t.materias m");
+			}
+			jpql.append(" WHERE t.activo = true");
+			if (carreraId != null) {
+				jpql.append(" AND t.carrera.id = :carreraId");
+			}
+			if (asignaturaId != null) {
+				jpql.append(" AND m.id = :asignaturaId");
+			} else if (semestreMax != null) {
+				jpql.append(" AND m.carrera.id = :carreraId AND m.semestre <= :semestreMax");
+			}
+
+			var query = em.createQuery(jpql.toString(), Long.class);
+			if (carreraId != null) {
+				query.setParameter("carreraId", carreraId);
+			}
+			if (asignaturaId != null) {
+				query.setParameter("asignaturaId", asignaturaId);
+			} else if (semestreMax != null) {
+				query.setParameter("semestreMax", semestreMax);
+			}
+
+			List<Long> ids = query.getResultList();
+			if (ids.isEmpty()) {
+				return List.of();
+			}
+
+			return em.createQuery(
+					"SELECT DISTINCT t FROM Tutor t "
+							+ "LEFT JOIN FETCH t.carrera "
+							+ "LEFT JOIN FETCH t.materias "
+							+ "WHERE t.id IN :ids "
+							+ "ORDER BY t.nombre, t.apellido",
+					Tutor.class)
+					.setParameter("ids", ids)
+					.getResultList();
+		} finally {
+			em.close();
+		}
+	}
 }

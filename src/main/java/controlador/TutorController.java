@@ -17,8 +17,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import modelo.dao.AsignaturaDAO;
 import modelo.dao.DisponibilidadDAO;
+import modelo.dao.SolicitudDAO;
 import modelo.dao.TutorDAO;
 import modelo.entities.Asignatura;
+import modelo.entities.EstadoSolicitud;
 import modelo.entities.Tutor;
 import modelo.entities.Usuario;
 
@@ -30,6 +32,7 @@ public class TutorController extends HttpServlet {
 	private final DisponibilidadDAO disponibilidadDAO = new DisponibilidadDAO();
 	private final TutorDAO tutorDAO = new TutorDAO();
 	private final AsignaturaDAO asignaturaDAO = new AsignaturaDAO();
+	private final SolicitudDAO solicitudDAO = new SolicitudDAO();
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -58,6 +61,8 @@ public class TutorController extends HttpServlet {
 			case "guardar-horarios" -> guardarHorarios(req, resp);
 			case "materias" -> materias(req, resp);
 			case "guardar-materias" -> guardarMaterias(req, resp);
+			case "solicitudes" -> solicitudes(req, resp);
+			case "responder-solicitud" -> responderSolicitud(req, resp);
 			default -> resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Ruta no encontrada");
 		}
 	}
@@ -207,6 +212,73 @@ public class TutorController extends HttpServlet {
 			getServletContext().log("Error al guardar materias del tutor", e);
 			resp.sendRedirect(req.getContextPath() + "/tutor?ruta=materias&error="
 					+ java.net.URLEncoder.encode("No se pudieron guardar las materias.",
+							java.nio.charset.StandardCharsets.UTF_8));
+		}
+	}
+
+	private void solicitudes(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		Tutor tutor = requerirTutor(req, resp);
+		if (tutor == null) {
+			return;
+		}
+
+		req.setAttribute("tutor", tutor);
+		req.setAttribute("solicitudes", solicitudDAO.listarPorTutor(tutor.getId()));
+
+		if ("ok".equals(req.getParameter("mensaje"))) {
+			req.setAttribute("mensaje", "Solicitud actualizada correctamente.");
+		}
+		if (req.getParameter("error") != null && !req.getParameter("error").isBlank()) {
+			req.setAttribute("error", req.getParameter("error"));
+		}
+
+		req.getRequestDispatcher("/vista/tutor/solicitudes.jsp").forward(req, resp);
+	}
+
+	private void responderSolicitud(HttpServletRequest req, HttpServletResponse resp)
+			throws IOException {
+		Tutor tutor = requerirTutor(req, resp);
+		if (tutor == null) {
+			return;
+		}
+
+		Long solicitudId = null;
+		String idRaw = req.getParameter("solicitudId");
+		if (idRaw != null && !idRaw.isBlank()) {
+			try {
+				solicitudId = Long.valueOf(idRaw.trim());
+			} catch (NumberFormatException ignored) {
+				solicitudId = null;
+			}
+		}
+
+		String accion = req.getParameter("accion");
+		EstadoSolicitud nuevoEstado = null;
+		if ("aceptar".equalsIgnoreCase(accion)) {
+			nuevoEstado = EstadoSolicitud.ACEPTADA;
+		} else if ("rechazar".equalsIgnoreCase(accion)) {
+			nuevoEstado = EstadoSolicitud.RECHAZADA;
+		}
+
+		if (solicitudId == null || nuevoEstado == null) {
+			resp.sendRedirect(req.getContextPath() + "/tutor?ruta=solicitudes&error="
+					+ java.net.URLEncoder.encode("Acción inválida.",
+							java.nio.charset.StandardCharsets.UTF_8));
+			return;
+		}
+
+		try {
+			solicitudDAO.actualizarEstado(solicitudId, tutor.getId(), nuevoEstado);
+			resp.sendRedirect(req.getContextPath() + "/tutor?ruta=solicitudes&mensaje=ok");
+		} catch (IllegalArgumentException | IllegalStateException e) {
+			resp.sendRedirect(req.getContextPath() + "/tutor?ruta=solicitudes&error="
+					+ java.net.URLEncoder.encode(e.getMessage(),
+							java.nio.charset.StandardCharsets.UTF_8));
+		} catch (RuntimeException e) {
+			getServletContext().log("Error al responder solicitud", e);
+			resp.sendRedirect(req.getContextPath() + "/tutor?ruta=solicitudes&error="
+					+ java.net.URLEncoder.encode("No se pudo actualizar la solicitud.",
 							java.nio.charset.StandardCharsets.UTF_8));
 		}
 	}
