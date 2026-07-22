@@ -25,6 +25,9 @@ public class SesionLlamada implements Serializable {
     @Column(name = "student_id", nullable = false)
     private Long studentId;
 
+    @Column(name = "solicitud_id")
+    private Long solicitudId;
+
     @Column(name = "room_name", length = 255)
     private String roomName;
 
@@ -67,6 +70,14 @@ public class SesionLlamada implements Serializable {
 
     public void setStudentId(Long studentId) {
         this.studentId = studentId;
+    }
+
+    public Long getSolicitudId() {
+        return solicitudId;
+    }
+
+    public void setSolicitudId(Long solicitudId) {
+        this.solicitudId = solicitudId;
     }
 
     public String getRoomName() {

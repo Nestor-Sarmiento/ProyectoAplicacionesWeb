@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Sesión de tutoría OwlShare</title>
+</head>
+<body style="margin:0;padding:0;background:#f7f9fc;font-family:Arial,Helvetica,sans-serif;color:#191c1e;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f7f9fc;padding:24px 12px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="560" cellspacing="0" cellpadding="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 8px 24px rgba(25,28,30,0.08);">
+          <tr>
+            <td style="background:#24389c;padding:20px 28px;">
+              <p style="margin:0;font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;">OwlShare</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:28px;">
+              <p style="margin:0 0 12px;font-size:18px;font-weight:700;color:#24389c;">Tu sesión como {{ROL}} está lista</p>
+              <p style="margin:0 0 16px;font-size:14px;line-height:1.5;color:#454652;">
+                Hola <strong>{{NOMBRE}}</strong>,
+              </p>
+              <p style="margin:0 0 16px;font-size:14px;line-height:1.5;color:#454652;">
+                Se aceptó la tutoría de <strong>{{MATERIA}}</strong>
+                programada para el <strong>{{FECHA}}</strong>
+                (<strong>{{HORARIO}}</strong>).
+              </p>
+              <p style="margin:0 0 20px;font-size:14px;line-height:1.5;color:#454652;">
+                Usa el botón para unirte a la videollamada. Este enlace es personal: no lo compartas.
+              </p>
+              <p style="margin:0 0 24px;" align="center">
+                <a href="{{ENLACE}}"
+                   style="display:inline-block;background:#24389c;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 22px;border-radius:8px;">
+                  Unirme a la tutoría
+                </a>
+              </p>
+              <p style="margin:0 0 8px;font-size:12px;line-height:1.5;color:#757684;">
+                Si el botón no funciona, copia y pega este enlace en tu navegador:
+              </p>
+              <p style="margin:0;font-size:12px;line-height:1.5;word-break:break-all;color:#24389c;">
+                {{ENLACE}}
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:16px 28px;background:#f2f4f7;font-size:11px;color:#757684;">
+              OwlShare · Intercambio académico entre estudiantes
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

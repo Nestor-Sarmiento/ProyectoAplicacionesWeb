@@ -19,15 +19,19 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import modelo.dao.AsignaturaDAO;
-import modelo.dao.DisponibilidadDAO;
-import modelo.dao.SolicitudDAO;
 import modelo.dao.TutorDAO;
 import modelo.entities.Asignatura;
 import modelo.entities.DiaSemana;
 import modelo.entities.Disponibilidad;
 import modelo.entities.Estudiante;
+import modelo.entities.SolicitudTutoria;
 import modelo.entities.Tutor;
 import modelo.entities.Usuario;
+import modelo.services.DisponibilidadService;
+import modelo.services.LlamadaService;
+import modelo.services.SolicitudService;
+import modelo.services.TutorService;
+import util.EnvLoader;
 
 @WebServlet("/estudiante")
 public class EstudianteController extends HttpServlet {
@@ -36,10 +40,16 @@ public class EstudianteController extends HttpServlet {
 	private static final DateTimeFormatter FECHA_ISO = DateTimeFormatter.ISO_LOCAL_DATE;
 	private static final DateTimeFormatter FECHA_CORTA = DateTimeFormatter.ofPattern("dd/MM");
 
+	private final TutorService tutorService = new TutorService();
 	private final TutorDAO tutorDAO = new TutorDAO();
 	private final AsignaturaDAO asignaturaDAO = new AsignaturaDAO();
-	private final DisponibilidadDAO disponibilidadDAO = new DisponibilidadDAO();
-	private final SolicitudDAO solicitudDAO = new SolicitudDAO();
+	private final DisponibilidadService disponibilidadService = new DisponibilidadService();
+	private final SolicitudService solicitudService = new SolicitudService();
+	private final LlamadaService llamadaService = new LlamadaService();
+
+	static {
+		EnvLoader.ensureLoaded();
+	}
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -82,8 +92,9 @@ public class EstudianteController extends HttpServlet {
 		}
 
 		req.setAttribute("estudiante", estudiante);
-		req.setAttribute("proximasSesiones",
-				solicitudDAO.listarProximasSesionesEstudiante(estudiante.getId()));
+		List<SolicitudTutoria> proximas = solicitudService.listarProximasSesionesEstudiante(estudiante.getId());
+		req.setAttribute("proximasSesiones", proximas);
+		req.setAttribute("enlacesUnirse", llamadaService.mapearEnlacesUnirse(proximas, false));
 		req.getRequestDispatcher("/vista/estudiante/dashboard.jsp").forward(req, resp);
 	}
 
@@ -95,7 +106,9 @@ public class EstudianteController extends HttpServlet {
 		}
 
 		req.setAttribute("estudiante", estudiante);
-		req.setAttribute("solicitudes", solicitudDAO.listarPorEstudiante(estudiante.getId()));
+		List<SolicitudTutoria> solicitudes = solicitudService.listarPorEstudiante(estudiante.getId());
+		req.setAttribute("solicitudes", solicitudes);
+		req.setAttribute("enlacesUnirse", llamadaService.mapearEnlacesUnirse(solicitudes, false));
 
 		if ("ok".equals(req.getParameter("mensaje"))) {
 			req.setAttribute("mensaje", "Solicitud cancelada correctamente.");
@@ -122,7 +135,7 @@ public class EstudianteController extends HttpServlet {
 		}
 
 		try {
-			solicitudDAO.cancelarPorEstudiante(solicitudId, estudiante.getId());
+			solicitudService.cancelarPorEstudiante(solicitudId, estudiante.getId());
 			resp.sendRedirect(redirect + "&mensaje=ok");
 		} catch (IllegalArgumentException | IllegalStateException e) {
 			resp.sendRedirect(redirect + "&error=" + encode(e.getMessage()));
@@ -168,9 +181,9 @@ public class EstudianteController extends HttpServlet {
 
 		List<Tutor> tutores;
 		if (asignaturaId != null) {
-			tutores = tutorDAO.buscar(estudiante.getCarrera().getId(), asignaturaId);
+			tutores = tutorService.buscar(estudiante.getCarrera().getId(), asignaturaId);
 		} else {
-			tutores = tutorDAO.buscar(
+			tutores = tutorService.buscar(
 					estudiante.getCarrera().getId(), null, estudiante.getSemestre());
 		}
 
@@ -277,7 +290,7 @@ public class EstudianteController extends HttpServlet {
 		LocalDate lunesSiguiente = lunesActual.plusWeeks(1);
 		LocalDate domingoSiguiente = lunesSiguiente.plusDays(6);
 
-		Set<String> ocupados = solicitudDAO.clavesSlotsOcupados(
+		Set<String> ocupados = solicitudService.clavesSlotsOcupados(
 				tutorId, lunesActual, domingoSiguiente);
 
 		String slotsDisponiblesCsv = horarios.stream()
@@ -378,7 +391,7 @@ public class EstudianteController extends HttpServlet {
 		}
 
 		try {
-			solicitudDAO.crear(
+			solicitudService.crear(
 					estudiante.getId(), tutorId, asignaturaId, disponibilidadId, fechaSesion, mensaje);
 			resp.sendRedirect(redirectDetalle + "&mensaje=ok");
 		} catch (IllegalArgumentException | IllegalStateException e) {
@@ -410,7 +423,7 @@ public class EstudianteController extends HttpServlet {
 	}
 
 	private List<Disponibilidad> listarHorariosOrdenados(Long tutorId) {
-		return disponibilidadDAO.listarPorTutor(tutorId).stream()
+		return disponibilidadService.listarPorTutor(tutorId).stream()
 				.sorted(Comparator
 						.comparing((Disponibilidad d) -> d.getDiaSemana().ordinal())
 						.thenComparing(Disponibilidad::getHoraInicio))

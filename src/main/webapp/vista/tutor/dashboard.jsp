@@ -192,16 +192,26 @@
                                         — <c:out value="${sesion.asignatura.nombre}"/>
                                     </p>
                                 </div>
-                                <div class="sm:text-right">
-                                    <p class="font-bold text-sm text-on-surface">
-                                        <c:out value="${sesion.fechaSesion}"/>
-                                    </p>
-                                    <c:if test="${not empty sesion.disponibilidad}">
-                                        <p class="text-xs text-outline">
-                                            <c:out value="${sesion.disponibilidad.diaSemana.etiqueta}"/>
-                                            · <c:out value="${sesion.disponibilidad.horaInicio}"/>
-                                            – <c:out value="${sesion.disponibilidad.horaFin}"/>
+                                <div class="flex flex-col sm:items-end gap-2">
+                                    <div class="sm:text-right">
+                                        <p class="font-bold text-sm text-on-surface">
+                                            <c:out value="${sesion.fechaSesion}"/>
                                         </p>
+                                        <c:if test="${not empty sesion.disponibilidad}">
+                                            <p class="text-xs text-outline">
+                                                <c:out value="${sesion.disponibilidad.diaSemana.etiqueta}"/>
+                                                · <c:out value="${sesion.disponibilidad.horaInicio}"/>
+                                                – <c:out value="${sesion.disponibilidad.horaFin}"/>
+                                            </p>
+                                        </c:if>
+                                    </div>
+                                    <c:if test="${not empty enlacesUnirse[sesion.id]}">
+                                        <a href="${enlacesUnirse[sesion.id]}" target="_blank" rel="noopener noreferrer"
+                                           class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg
+                                                  bg-secondary text-white text-xs font-bold hover:opacity-90">
+                                            <span class="material-symbols-outlined text-sm">videocam</span>
+                                            Unirse
+                                        </a>
                                     </c:if>
                                 </div>
                             </div>

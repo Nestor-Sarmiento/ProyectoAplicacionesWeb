@@ -54,8 +54,40 @@ public final class CatalogoSeeder {
 		}
 	}
 
+	private static void asegurarTablaSesionLlamada() {
+		EntityManager em = JPAUtil.getEntityManager();
+		try {
+			em.getTransaction().begin();
+			em.createNativeQuery("""
+					CREATE TABLE IF NOT EXISTS sesion_llamada (
+					  ID BIGINT NOT NULL AUTO_INCREMENT,
+					  tutor_id BIGINT NOT NULL,
+					  student_id BIGINT NOT NULL,
+					  solicitud_id BIGINT NULL,
+					  room_name VARCHAR(255) NULL,
+					  livekit_url VARCHAR(500) NULL,
+					  tutor_token VARCHAR(2000) NULL,
+					  student_token VARCHAR(2000) NULL,
+					  calificacion INT NULL,
+					  comentario VARCHAR(1000) NULL,
+					  completada TINYINT(1) NOT NULL DEFAULT 0,
+					  PRIMARY KEY (ID)
+					)
+					""").executeUpdate();
+			em.getTransaction().commit();
+		} catch (RuntimeException e) {
+			if (em.getTransaction().isActive()) {
+				em.getTransaction().rollback();
+			}
+			System.err.println("Aviso al asegurar sesion_llamada: " + e.getMessage());
+		} finally {
+			em.close();
+		}
+	}
+
 	public static synchronized void asegurarCatalogo() {
 		asegurarTablaSolicitudes();
+		asegurarTablaSesionLlamada();
 
 		if (carreraDAO.contar() > 0) {
 			return;

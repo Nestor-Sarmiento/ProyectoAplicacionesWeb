@@ -62,6 +62,12 @@
                 <c:out value="${mensaje}"/>
             </div>
         </c:if>
+        <c:if test="${not empty aviso}">
+            <div class="mb-6 flex items-center gap-3 bg-amber-50 text-amber-800 text-sm font-medium px-4 py-3 rounded-lg">
+                <span class="material-symbols-outlined text-base">warning</span>
+                <c:out value="${aviso}"/>
+            </div>
+        </c:if>
         <c:if test="${not empty error}">
             <div class="mb-6 flex items-center gap-3 bg-red-50 text-red-700 text-sm font-medium px-4 py-3 rounded-lg">
                 <span class="material-symbols-outlined text-base">error</span>
@@ -165,6 +171,14 @@
                             </c:if>
                             <c:if test="${s.estado.name() == 'ACEPTADA'}">
                                 <div class="flex flex-wrap gap-2 pt-2 border-t border-outline-variant/20">
+                                    <c:if test="${not empty enlacesUnirse[s.id]}">
+                                        <a href="${enlacesUnirse[s.id]}" target="_blank" rel="noopener noreferrer"
+                                           class="inline-flex items-center gap-1 px-4 py-2 rounded-lg
+                                                  bg-secondary text-white text-sm font-bold hover:opacity-90">
+                                            <span class="material-symbols-outlined text-sm">videocam</span>
+                                            Unirse a la tutoría
+                                        </a>
+                                    </c:if>
                                     <form method="post" action="${pageContext.request.contextPath}/tutor"
                                           onsubmit="return confirm('¿Seguro que deseas cancelar esta sesión?');">
                                         <input type="hidden" name="ruta" value="cancelar-solicitud"/>
