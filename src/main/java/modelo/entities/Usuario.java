@@ -4,8 +4,6 @@ import java.io.Serializable;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -44,10 +42,6 @@ public abstract class Usuario implements Serializable {
 
 	@Column(nullable = false)
 	private boolean activo = true;
-
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = true, length = 20)
-	private Rol rol;
 
 	protected Usuario() {
 	}
@@ -137,22 +131,5 @@ public abstract class Usuario implements Serializable {
 
 	public static long getSerialversionuid() {
 		return serialVersionUID;
-	}
-
-	public Rol getRol() {
-		if (rol != null) {
-			return rol;
-		}
-		if (this instanceof Tutor) {
-			return Rol.TUTOR;
-		}
-		if (this instanceof Estudiante) {
-			return Rol.ESTUDIANTE;
-		}
-		return null;
-	}
-
-	public void setRol(Rol rol) {
-		this.rol = rol;
 	}
 }
