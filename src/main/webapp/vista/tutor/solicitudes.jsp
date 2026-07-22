@@ -163,6 +163,22 @@
                                     </form>
                                 </div>
                             </c:if>
+                            <c:if test="${s.estado.name() == 'ACEPTADA'}">
+                                <div class="flex flex-wrap gap-2 pt-2 border-t border-outline-variant/20">
+                                    <form method="post" action="${pageContext.request.contextPath}/tutor"
+                                          onsubmit="return confirm('¿Seguro que deseas cancelar esta sesión?');">
+                                        <input type="hidden" name="ruta" value="cancelar-solicitud"/>
+                                        <input type="hidden" name="solicitudId" value="${s.id}"/>
+                                        <button type="submit"
+                                                class="inline-flex items-center gap-1 px-4 py-2 rounded-lg
+                                                       bg-surface-container-highest text-on-surface-variant
+                                                       text-sm font-bold hover:bg-red-50 hover:text-red-700">
+                                            <span class="material-symbols-outlined text-sm">cancel</span>
+                                            Cancelar sesión
+                                        </button>
+                                    </form>
+                                </div>
+                            </c:if>
                         </article>
                     </c:forEach>
                 </div>

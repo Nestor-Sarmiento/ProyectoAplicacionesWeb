@@ -56,6 +56,19 @@
             </p>
         </div>
 
+        <c:if test="${not empty mensaje}">
+            <div class="mb-6 flex items-center gap-3 bg-emerald-50 text-emerald-800 text-sm font-medium px-4 py-3 rounded-lg">
+                <span class="material-symbols-outlined text-base">check_circle</span>
+                <c:out value="${mensaje}"/>
+            </div>
+        </c:if>
+        <c:if test="${not empty error}">
+            <div class="mb-6 flex items-center gap-3 bg-red-50 text-red-700 text-sm font-medium px-4 py-3 rounded-lg">
+                <span class="material-symbols-outlined text-base">error</span>
+                <c:out value="${error}"/>
+            </div>
+        </c:if>
+
         <c:choose>
             <c:when test="${not empty solicitudes}">
                 <div class="space-y-4">
@@ -122,6 +135,26 @@
                                     </p>
                                 </c:if>
                             </div>
+
+                            <c:if test="${s.estado.name() == 'PENDIENTE' or s.estado.name() == 'ACEPTADA'}">
+                                <div class="flex flex-wrap gap-2 pt-4 mt-4 border-t border-outline-variant/20">
+                                    <form method="post" action="${pageContext.request.contextPath}/estudiante"
+                                          onsubmit="return confirm('¿Seguro que deseas cancelar esta solicitud?');">
+                                        <input type="hidden" name="ruta" value="cancelar-solicitud"/>
+                                        <input type="hidden" name="solicitudId" value="${s.id}"/>
+                                        <button type="submit"
+                                                class="inline-flex items-center gap-1 px-4 py-2 rounded-lg
+                                                       bg-surface-container-highest text-on-surface-variant
+                                                       text-sm font-bold hover:bg-red-50 hover:text-red-700">
+                                            <span class="material-symbols-outlined text-sm">cancel</span>
+                                            <c:choose>
+                                                <c:when test="${s.estado.name() == 'ACEPTADA'}">Cancelar sesión</c:when>
+                                                <c:otherwise>Cancelar solicitud</c:otherwise>
+                                            </c:choose>
+                                        </button>
+                                    </form>
+                                </div>
+                            </c:if>
                         </article>
                     </c:forEach>
                 </div>

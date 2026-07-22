@@ -1,7 +1,10 @@
 package modelo.dao;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
+
+import org.hibernate.Session;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -12,6 +15,7 @@ import modelo.entities.Carrera;
 import modelo.entities.Estudiante;
 import modelo.entities.Tutor;
 import modelo.entities.Usuario;
+import util.HibernateUtil;
 
 public class UsuarioDAO {
 

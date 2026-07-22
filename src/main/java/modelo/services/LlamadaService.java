@@ -8,6 +8,7 @@ import modelo.dao.SesionLlamadaDAO;
 import modelo.dao.UsuarioDAO;
 import modelo.entities.LlamadaAcceso;
 import modelo.entities.LlamadaTokenRespuesta;
+import modelo.entities.Rol;
 import modelo.entities.SesionLlamada;
 import modelo.entities.Usuario;
 import util.EmailService;
