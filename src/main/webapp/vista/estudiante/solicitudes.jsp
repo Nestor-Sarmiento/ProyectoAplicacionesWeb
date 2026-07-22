@@ -138,6 +138,14 @@
 
                             <c:if test="${s.estado.name() == 'PENDIENTE' or s.estado.name() == 'ACEPTADA'}">
                                 <div class="flex flex-wrap gap-2 pt-4 mt-4 border-t border-outline-variant/20">
+                                    <c:if test="${s.estado.name() == 'ACEPTADA' and not empty enlacesUnirse[s.id]}">
+                                        <a href="${enlacesUnirse[s.id]}" target="_blank" rel="noopener noreferrer"
+                                           class="inline-flex items-center gap-1 px-4 py-2 rounded-lg
+                                                  bg-secondary text-white text-sm font-bold hover:opacity-90">
+                                            <span class="material-symbols-outlined text-sm">videocam</span>
+                                            Unirse a la tutoría
+                                        </a>
+                                    </c:if>
                                     <form method="post" action="${pageContext.request.contextPath}/estudiante"
                                           onsubmit="return confirm('¿Seguro que deseas cancelar esta solicitud?');">
                                         <input type="hidden" name="ruta" value="cancelar-solicitud"/>

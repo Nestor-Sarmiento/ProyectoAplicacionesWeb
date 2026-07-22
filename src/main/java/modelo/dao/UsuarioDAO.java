@@ -4,8 +4,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import org.hibernate.Session;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
@@ -15,7 +13,6 @@ import modelo.entities.Carrera;
 import modelo.entities.Estudiante;
 import modelo.entities.Tutor;
 import modelo.entities.Usuario;
-import util.HibernateUtil;
 
 public class UsuarioDAO {
 
@@ -57,6 +54,18 @@ public class UsuarioDAO {
 			return query.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
+		} finally {
+			em.close();
+		}
+	}
+
+	public Optional<Usuario> buscarPorId(Long id) {
+		if (id == null) {
+			return Optional.empty();
+		}
+		EntityManager em = JPAUtil.getEntityManager();
+		try {
+			return Optional.ofNullable(em.find(Usuario.class, id));
 		} finally {
 			em.close();
 		}
@@ -105,13 +114,4 @@ public class UsuarioDAO {
 			em.close();
 		}
 	}
-
-	public Optional<Usuario> buscarPorId(Long id) {
-        if (id == null) {
-            return Optional.empty();
-        }
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return Optional.ofNullable(session.get(Usuario.class, id));
-        }
-    }
 }

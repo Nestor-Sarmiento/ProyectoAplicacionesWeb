@@ -8,6 +8,7 @@
 		<class>modelo.entities.Tutor</class>
 		<class>modelo.entities.Disponibilidad</class>
 		<class>modelo.entities.SolicitudTutoria</class>
+		<class>modelo.entities.SesionLlamada</class>
 		<class>modelo.entities.Carrera</class>
 		<class>modelo.entities.Asignatura</class>
 

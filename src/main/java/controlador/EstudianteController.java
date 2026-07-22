@@ -26,8 +26,11 @@ import modelo.entities.Asignatura;
 import modelo.entities.DiaSemana;
 import modelo.entities.Disponibilidad;
 import modelo.entities.Estudiante;
+import modelo.entities.SolicitudTutoria;
 import modelo.entities.Tutor;
 import modelo.entities.Usuario;
+import modelo.services.LlamadaService;
+import util.EnvLoader;
 
 @WebServlet("/estudiante")
 public class EstudianteController extends HttpServlet {
@@ -40,6 +43,11 @@ public class EstudianteController extends HttpServlet {
 	private final AsignaturaDAO asignaturaDAO = new AsignaturaDAO();
 	private final DisponibilidadDAO disponibilidadDAO = new DisponibilidadDAO();
 	private final SolicitudDAO solicitudDAO = new SolicitudDAO();
+	private final LlamadaService llamadaService = new LlamadaService();
+
+	static {
+		EnvLoader.ensureLoaded();
+	}
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -82,8 +90,9 @@ public class EstudianteController extends HttpServlet {
 		}
 
 		req.setAttribute("estudiante", estudiante);
-		req.setAttribute("proximasSesiones",
-				solicitudDAO.listarProximasSesionesEstudiante(estudiante.getId()));
+		List<SolicitudTutoria> proximas = solicitudDAO.listarProximasSesionesEstudiante(estudiante.getId());
+		req.setAttribute("proximasSesiones", proximas);
+		req.setAttribute("enlacesUnirse", llamadaService.mapearEnlacesUnirse(proximas, false));
 		req.getRequestDispatcher("/vista/estudiante/dashboard.jsp").forward(req, resp);
 	}
 
@@ -95,7 +104,9 @@ public class EstudianteController extends HttpServlet {
 		}
 
 		req.setAttribute("estudiante", estudiante);
-		req.setAttribute("solicitudes", solicitudDAO.listarPorEstudiante(estudiante.getId()));
+		List<SolicitudTutoria> solicitudes = solicitudDAO.listarPorEstudiante(estudiante.getId());
+		req.setAttribute("solicitudes", solicitudes);
+		req.setAttribute("enlacesUnirse", llamadaService.mapearEnlacesUnirse(solicitudes, false));
 
 		if ("ok".equals(req.getParameter("mensaje"))) {
 			req.setAttribute("mensaje", "Solicitud cancelada correctamente.");
