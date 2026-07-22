@@ -15,6 +15,7 @@ import modelo.entities.Estudiante;
 import modelo.entities.Tutor;
 import modelo.entities.Usuario;
 import modelo.services.CatalogoSeeder;
+import util.EnvLoader;
 
 @WebServlet("/login")
 public class LoginController extends HttpServlet {
@@ -23,6 +24,10 @@ public class LoginController extends HttpServlet {
 
 	private final UsuarioDAO usuarioDAO = new UsuarioDAO();
 	private final CarreraDAO carreraDAO = new CarreraDAO();
+
+	static {
+		EnvLoader.ensureLoaded();
+	}
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)

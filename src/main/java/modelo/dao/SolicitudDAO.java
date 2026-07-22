@@ -297,15 +297,24 @@ public class SolicitudDAO {
 		}
 	}
 
-	public void actualizarEstado(Long solicitudId, Long tutorId, EstadoSolicitud nuevoEstado) {
+	public SolicitudTutoria actualizarEstado(Long solicitudId, Long tutorId, EstadoSolicitud nuevoEstado) {
 		if (solicitudId == null || tutorId == null || nuevoEstado == null) {
 			throw new IllegalArgumentException("Datos incompletos.");
 		}
 		EntityManager em = JPAUtil.getEntityManager();
 		try {
 			em.getTransaction().begin();
-			SolicitudTutoria s = em.find(SolicitudTutoria.class, solicitudId);
-			if (s == null || !s.getTutor().getId().equals(tutorId)) {
+			SolicitudTutoria s = em.createQuery(
+					"SELECT s FROM SolicitudTutoria s "
+							+ "JOIN FETCH s.estudiante "
+							+ "JOIN FETCH s.tutor "
+							+ "JOIN FETCH s.asignatura "
+							+ "LEFT JOIN FETCH s.disponibilidad "
+							+ "WHERE s.id = :id",
+					SolicitudTutoria.class)
+					.setParameter("id", solicitudId)
+					.getSingleResult();
+			if (!s.getTutor().getId().equals(tutorId)) {
 				throw new IllegalArgumentException("Solicitud no encontrada.");
 			}
 			if (s.getEstado() != EstadoSolicitud.PENDIENTE) {
@@ -313,6 +322,12 @@ public class SolicitudDAO {
 			}
 			s.setEstado(nuevoEstado);
 			em.getTransaction().commit();
+			return s;
+		} catch (jakarta.persistence.NoResultException e) {
+			if (em.getTransaction().isActive()) {
+				em.getTransaction().rollback();
+			}
+			throw new IllegalArgumentException("Solicitud no encontrada.");
 		} catch (RuntimeException e) {
 			if (em.getTransaction().isActive()) {
 				em.getTransaction().rollback();

@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import modelo.entities.LlamadaAcceso;
 import modelo.entities.LlamadaTokenRespuesta;
+import modelo.entities.SesionLlamada;
 
 public final class LlamadaSalaUtil {
 
@@ -19,6 +20,26 @@ public final class LlamadaSalaUtil {
                 + "&livekitUrl=" + codificar(livekitUrl)
                 + "&sessionId=" + sessionId
                 + "&token=" + codificar(token);
+    }
+
+    public static String enlaceTutor(SesionLlamada sesion) {
+        if (sesion == null || sesion.getId() == null
+                || blank(sesion.getRoomName()) || blank(sesion.getLivekitUrl())
+                || blank(sesion.getTutorToken())) {
+            return null;
+        }
+        return construirEnlaceAcceso(
+                sesion.getRoomName(), sesion.getLivekitUrl(), sesion.getId(), sesion.getTutorToken());
+    }
+
+    public static String enlaceEstudiante(SesionLlamada sesion) {
+        if (sesion == null || sesion.getId() == null
+                || blank(sesion.getRoomName()) || blank(sesion.getLivekitUrl())
+                || blank(sesion.getStudentToken())) {
+            return null;
+        }
+        return construirEnlaceAcceso(
+                sesion.getRoomName(), sesion.getLivekitUrl(), sesion.getId(), sesion.getStudentToken());
     }
 
     public static LlamadaAcceso crearAcceso(String rol, String correo, LlamadaTokenRespuesta respuesta,
@@ -48,6 +69,10 @@ public final class LlamadaSalaUtil {
 
     private static String codificar(String valor) {
         return URLEncoder.encode(valor == null ? "" : valor, StandardCharsets.UTF_8);
+    }
+
+    private static boolean blank(String valor) {
+        return valor == null || valor.isBlank();
     }
 
     private static boolean esNumero(String valor) {

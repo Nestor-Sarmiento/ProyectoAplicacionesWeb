@@ -21,8 +21,11 @@ import modelo.dao.SolicitudDAO;
 import modelo.dao.TutorDAO;
 import modelo.entities.Asignatura;
 import modelo.entities.EstadoSolicitud;
+import modelo.entities.SolicitudTutoria;
 import modelo.entities.Tutor;
 import modelo.entities.Usuario;
+import modelo.services.LlamadaService;
+import util.EnvLoader;
 
 @WebServlet("/tutor")
 public class TutorController extends HttpServlet {
@@ -33,6 +36,11 @@ public class TutorController extends HttpServlet {
 	private final TutorDAO tutorDAO = new TutorDAO();
 	private final AsignaturaDAO asignaturaDAO = new AsignaturaDAO();
 	private final SolicitudDAO solicitudDAO = new SolicitudDAO();
+	private final LlamadaService llamadaService = new LlamadaService();
+
+	static {
+		EnvLoader.ensureLoaded();
+	}
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -88,8 +96,9 @@ public class TutorController extends HttpServlet {
 						.comparingInt(Asignatura::getSemestre)
 						.thenComparing(Asignatura::getCodigo))
 				.toList());
-		req.setAttribute("proximasSesiones",
-				solicitudDAO.listarProximasSesionesTutor(tutor.getId()));
+		List<SolicitudTutoria> proximas = solicitudDAO.listarProximasSesionesTutor(tutor.getId());
+		req.setAttribute("proximasSesiones", proximas);
+		req.setAttribute("enlacesUnirse", llamadaService.mapearEnlacesUnirse(proximas, true));
 		req.getRequestDispatcher("/vista/tutor/dashboard.jsp").forward(req, resp);
 	}
 
@@ -227,10 +236,15 @@ public class TutorController extends HttpServlet {
 		}
 
 		req.setAttribute("tutor", tutor);
-		req.setAttribute("solicitudes", solicitudDAO.listarPorTutor(tutor.getId()));
+		List<SolicitudTutoria> solicitudes = solicitudDAO.listarPorTutor(tutor.getId());
+		req.setAttribute("solicitudes", solicitudes);
+		req.setAttribute("enlacesUnirse", llamadaService.mapearEnlacesUnirse(solicitudes, true));
 
 		if ("ok".equals(req.getParameter("mensaje"))) {
 			req.setAttribute("mensaje", "Solicitud actualizada correctamente.");
+		}
+		if (req.getParameter("aviso") != null && !req.getParameter("aviso").isBlank()) {
+			req.setAttribute("aviso", req.getParameter("aviso"));
 		}
 		if (req.getParameter("error") != null && !req.getParameter("error").isBlank()) {
 			req.setAttribute("error", req.getParameter("error"));
@@ -272,7 +286,23 @@ public class TutorController extends HttpServlet {
 		}
 
 		try {
-			solicitudDAO.actualizarEstado(solicitudId, tutor.getId(), nuevoEstado);
+			SolicitudTutoria solicitud = solicitudDAO.actualizarEstado(
+					solicitudId, tutor.getId(), nuevoEstado);
+
+			if (nuevoEstado == EstadoSolicitud.ACEPTADA) {
+				try {
+					llamadaService.crearLlamadaParaSolicitud(solicitud);
+				} catch (RuntimeException e) {
+					getServletContext().log("Solicitud aceptada pero falló la creación de la llamada/correo", e);
+					resp.sendRedirect(req.getContextPath() + "/tutor?ruta=solicitudes&mensaje=ok&aviso="
+							+ java.net.URLEncoder.encode(
+									"Solicitud aceptada, pero no se pudo generar/enviar el enlace de la videollamada: "
+											+ e.getMessage(),
+									java.nio.charset.StandardCharsets.UTF_8));
+					return;
+				}
+			}
+
 			resp.sendRedirect(req.getContextPath() + "/tutor?ruta=solicitudes&mensaje=ok");
 		} catch (IllegalArgumentException | IllegalStateException e) {
 			resp.sendRedirect(req.getContextPath() + "/tutor?ruta=solicitudes&error="

@@ -21,10 +21,12 @@ public class Estudiante extends Usuario {
 	private Carrera carrera;
 
 	public Estudiante() {
+		setRol(Rol.ESTUDIANTE);
 	}
 
 	public Estudiante(String email, String password, String nombre, String apellido) {
 		super(email, password, nombre, apellido);
+		setRol(Rol.ESTUDIANTE);
 	}
 
 	public int getSemestre() {

@@ -46,7 +46,7 @@ public abstract class Usuario implements Serializable {
 	private boolean activo = true;
 
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false, length = 20)
+	@Column(nullable = true, length = 20)
 	private Rol rol;
 
 	protected Usuario() {
@@ -140,7 +140,16 @@ public abstract class Usuario implements Serializable {
 	}
 
 	public Rol getRol() {
-		return rol;
+		if (rol != null) {
+			return rol;
+		}
+		if (this instanceof Tutor) {
+			return Rol.TUTOR;
+		}
+		if (this instanceof Estudiante) {
+			return Rol.ESTUDIANTE;
+		}
+		return null;
 	}
 
 	public void setRol(Rol rol) {

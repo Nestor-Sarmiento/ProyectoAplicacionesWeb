@@ -33,10 +33,12 @@ public class Tutor extends Usuario {
 	private Set<Asignatura> materias = new HashSet<>();
 
 	public Tutor() {
+		setRol(Rol.TUTOR);
 	}
 
 	public Tutor(String email, String password, String nombre, String apellido) {
 		super(email, password, nombre, apellido);
+		setRol(Rol.TUTOR);
 	}
 
 	public int getSemestre() {
