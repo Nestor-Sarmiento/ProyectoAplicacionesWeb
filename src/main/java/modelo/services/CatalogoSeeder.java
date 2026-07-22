@@ -16,7 +16,47 @@ public final class CatalogoSeeder {
 	private CatalogoSeeder() {
 	}
 
+	/**
+	 * EclipseLink create-tables no recrea tablas borradas a mano mientras el EMF
+	 * ya está vivo; aseguramos la de solicitudes con SQL idempotente.
+	 */
+	private static void asegurarTablaSolicitudes() {
+		EntityManager em = JPAUtil.getEntityManager();
+		try {
+			em.getTransaction().begin();
+			em.createNativeQuery("""
+					CREATE TABLE IF NOT EXISTS solicitud_tutoria (
+					  ID BIGINT NOT NULL AUTO_INCREMENT,
+					  ESTADO VARCHAR(20) NOT NULL,
+					  fecha_creacion DATETIME NOT NULL,
+					  fecha_sesion DATE NOT NULL,
+					  MENSAJE VARCHAR(500) NOT NULL,
+					  asignatura_id BIGINT NOT NULL,
+					  disponibilidad_id BIGINT NOT NULL,
+					  estudiante_id BIGINT NOT NULL,
+					  tutor_id BIGINT NOT NULL,
+					  PRIMARY KEY (ID),
+					  CONSTRAINT FK_sol_asignatura FOREIGN KEY (asignatura_id) REFERENCES asignatura (ID),
+					  CONSTRAINT FK_sol_disponibilidad FOREIGN KEY (disponibilidad_id) REFERENCES disponibilidad_tutor (ID),
+					  CONSTRAINT FK_sol_estudiante FOREIGN KEY (estudiante_id) REFERENCES estudiante (ID),
+					  CONSTRAINT FK_sol_tutor FOREIGN KEY (tutor_id) REFERENCES tutor (ID)
+					)
+					""").executeUpdate();
+			em.getTransaction().commit();
+		} catch (RuntimeException e) {
+			if (em.getTransaction().isActive()) {
+				em.getTransaction().rollback();
+			}
+			// Si ya existe con otro nombre de constraint, no bloquear el arranque.
+			System.err.println("Aviso al asegurar solicitud_tutoria: " + e.getMessage());
+		} finally {
+			em.close();
+		}
+	}
+
 	public static synchronized void asegurarCatalogo() {
+		asegurarTablaSolicitudes();
+
 		if (carreraDAO.contar() > 0) {
 			return;
 		}

@@ -25,6 +25,24 @@ public class AsignaturaDAO {
 		}
 	}
 
+	public List<Asignatura> listarPorCarreraHastaSemestre(Long carreraId, int semestreMaximo) {
+		if (carreraId == null || semestreMaximo < 1) {
+			return List.of();
+		}
+		EntityManager em = JPAUtil.getEntityManager();
+		try {
+			return em.createQuery(
+					"SELECT a FROM Asignatura a WHERE a.carrera.id = :carreraId "
+							+ "AND a.semestre <= :semestreMaximo ORDER BY a.semestre, a.codigo",
+					Asignatura.class)
+					.setParameter("carreraId", carreraId)
+					.setParameter("semestreMaximo", semestreMaximo)
+					.getResultList();
+		} finally {
+			em.close();
+		}
+	}
+
 	public List<Asignatura> listarAprobadasParaTutor(Long carreraId, int semestreTutor) {
 		if (carreraId == null || semestreTutor < 2) {
 			return List.of();
