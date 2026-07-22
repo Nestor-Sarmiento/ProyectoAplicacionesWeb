@@ -13,7 +13,6 @@ import modelo.dao.UsuarioDAO;
 import modelo.entities.Estudiante;
 import modelo.entities.LlamadaAcceso;
 import modelo.entities.LlamadaTokenRespuesta;
-import modelo.entities.Rol;
 import modelo.entities.SesionLlamada;
 import modelo.entities.SolicitudTutoria;
 import modelo.entities.Tutor;
@@ -95,10 +94,10 @@ public class LlamadaService {
 		Usuario estudiante = studentOpt.orElseThrow(
 				() -> new IllegalArgumentException("El estudiante indicado no es válido."));
 
-		if (!(tutor instanceof Tutor) && tutor.getRol() != Rol.TUTOR) {
+		if (!(tutor instanceof Tutor)) {
 			throw new IllegalArgumentException("El tutor indicado no es válido.");
 		}
-		if (!(estudiante instanceof Estudiante) && estudiante.getRol() != Rol.ESTUDIANTE) {
+		if (!(estudiante instanceof Estudiante)) {
 			throw new IllegalArgumentException("El estudiante indicado no es válido.");
 		}
 
