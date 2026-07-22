@@ -3,20 +3,20 @@
 ## Actores
 
 - **Estudiante** (actor principal): usuario autenticado que necesita apoyo en una materia y solicita una sesión con un tutor.
-- **Tutor** (actor secundario, pasivo): recibe la solicitud en estado pendiente; no participa activamente en este caso de uso, pero debe tener materias y horarios configurados para que la solicitud sea posible.
+- **Tutor**: no interactúa en este caso de uso; solo queda como destinatario de la solicitud en estado pendiente (su interacción ocurre en CU-10).
 
 ## Descripción
 
-El estudiante elige un tutor, selecciona la materia, un horario disponible en el calendario (semana actual o siguiente) y redacta un mensaje explicando qué necesita. Al enviar la solicitud, el sistema la registra en estado **Pendiente** hasta que el tutor la acepte o rechace.
+Partiendo del **perfil del tutor**, el estudiante inicia la solicitud de tutoría, completa el formulario (materia, horario disponible en la semana actual o siguiente, y mensaje) y lo envía. El sistema valida los datos, registra la solicitud en estado **Pendiente** y confirma el resultado al estudiante.
 
-Este caso de uso puede iniciarse desde el perfil del tutor o desde la búsqueda de tutores, con la materia preseleccionada si el estudiante llegó filtrando por una asignatura.
+La búsqueda del tutor (con o sin filtro de materia) corresponde a casos de uso previos; este caso de uso comienza cuando el estudiante ya está visualizando el perfil.
 
 ## Precondiciones
 
 1. El estudiante tiene una sesión activa en OwlShare.
-2. Existe al menos un tutor activo con la materia deseada en su oferta y con horarios de disponibilidad configurados.
-3. La materia solicitada corresponde al semestre del estudiante (no puede pedir tutoría de materias de semestres superiores al suyo).
-4. El horario elegido pertenece a la **semana actual** o a la **semana siguiente**, no ha pasado y no está ocupado por otra solicitud pendiente o aceptada del mismo tutor.
+2. El estudiante se encuentra visualizando el **perfil del tutor** (CU-07).
+3. El tutor está activo, ofrece al menos una materia que el estudiante puede solicitar según su semestre, y tiene horarios de disponibilidad configurados.
+4. El horario que se elija deberá pertenecer a la **semana actual** o a la **semana siguiente**, no haber pasado y no estar ocupado por otra solicitud pendiente o aceptada del mismo tutor.
 
 ## Postcondiciones
 
@@ -34,91 +34,90 @@ Este caso de uso puede iniciarse desde el perfil del tutor o desde la búsqueda 
 
 ## Flujo principal
 
-1. El estudiante accede al perfil de un tutor o inicia el flujo **Solicitar tutoría** desde la búsqueda.
-2. El sistema muestra las materias que el tutor dicta y que el estudiante puede solicitar según su semestre.
-3. El estudiante selecciona la materia (si venía desde una búsqueda por materia, esta puede aparecer ya seleccionada).
-4. El sistema muestra un calendario con la **semana actual** y la **semana siguiente**, con los horarios disponibles del tutor.
-5. El estudiante selecciona un bloque horario libre (día y hora).
-6. El estudiante escribe un mensaje describiendo qué necesita de la tutoría (mínimo 10 caracteres, máximo 500).
-7. El estudiante confirma el envío de la solicitud.
-8. El sistema valida los datos y registra la solicitud en estado **Pendiente**.
-9. El sistema muestra un mensaje de confirmación y redirige al perfil del tutor indicando que la solicitud quedó pendiente de respuesta.
+1. Desde el perfil del tutor, el estudiante elige **Solicitar tutoría**.
+2. El sistema muestra el formulario de solicitud: materias elegibles, calendario de horarios (semana actual y siguiente) y campo de mensaje.
+3. El estudiante completa el formulario (materia, bloque horario libre y mensaje de 10 a 500 caracteres) y confirma el envío.
+4. El sistema valida los datos de la solicitud.
+5. El sistema registra la solicitud en estado **Pendiente**.
+6. El sistema muestra un mensaje de confirmación y redirige al perfil del tutor indicando que la solicitud quedó pendiente de respuesta.
 
 ## Flujos alternativos y de excepción
 
-### FA-1 — Materia preseleccionada desde la búsqueda
+### 2.1 — Materia ya preseleccionada
 
-- **Punto de divergencia:** paso 1.
-- El estudiante llegó filtrando tutores por una materia concreta.
-- El sistema muestra esa materia ya seleccionada y el estudiante continúa desde el paso 4.
+2.1.1. En el paso 2, el perfil del tutor se abrió con una materia de contexto (por ejemplo, tras filtrar en la búsqueda).  
+2.1.2. El sistema muestra esa materia ya seleccionada en el formulario.  
+2.1.3. El flujo continúa en el paso 3.
 
-### FA-2 — Cambio de semana en el calendario
+### 2.2 — Cambio de semana en el calendario
 
-- **Punto de divergencia:** paso 4.
-- El estudiante alterna entre la semana actual y la semana siguiente para ver más horarios.
-- Continúa en el paso 5 cuando elige un horario.
+2.2.1. En el paso 2, el estudiante alterna entre la semana actual y la semana siguiente.  
+2.2.2. El sistema actualiza el calendario con los horarios de la semana elegida.  
+2.2.3. El flujo continúa en el paso 3.
 
-### FA-3 — Horario no disponible en pantalla
+### 2.3 — Horario no disponible en pantalla
 
-- **Punto de divergencia:** paso 4.
-- Algunos bloques aparecen como **No disponible** u **Ocupados** porque ya tienen una solicitud pendiente o aceptada de otro estudiante.
-- El estudiante debe elegir otro horario libre (vuelve al paso 5).
+2.3.1. En el paso 2, el sistema marca algunos bloques como **No disponible** porque la fecha ya pasó o ya tienen una solicitud pendiente o aceptada.  
+2.3.2. El estudiante no puede seleccionar esos bloques.  
+2.3.3. El flujo continúa en el paso 3.
 
-### FE-1 — Sesión no iniciada
+### 2.4 — El tutor ya no permite solicitar
 
-- **Punto de divergencia:** paso 1.
-- El estudiante no está autenticado.
-- El sistema lo redirige al inicio de sesión y el caso de uso termina sin crear solicitud.
+2.4.1. En el paso 2, el tutor dejó de estar activo, no tiene materias elegibles o no tiene horarios disponibles.  
+2.4.2. El sistema no permite completar la solicitud e informa la situación.  
+2.4.3. El caso de uso termina sin crear solicitud.
 
-### FE-2 — Tutor no encontrado o inactivo
+### 4.1 — Datos incompletos
 
-- **Punto de divergencia:** paso 1.
-- El tutor no existe o no está activo.
-- El sistema muestra un error y redirige a la búsqueda de tutores.
+4.1.1. En el paso 4, falta materia, horario, fecha o mensaje.  
+4.1.2. El sistema muestra *«Completa materia, horario y mensaje para continuar.»*  
+4.1.3. El flujo regresa al paso 3.
 
-### FE-3 — Datos incompletos
+### 4.2 — Mensaje inválido
 
-- **Punto de divergencia:** paso 7.
-- Falta materia, horario, fecha o mensaje.
-- El sistema muestra el mensaje *«Completa materia, horario y mensaje para continuar.»* y el estudiante corrige la información.
-
-### FE-4 — Mensaje inválido
-
-- **Punto de divergencia:** paso 7.
-- El mensaje está vacío, tiene menos de 10 caracteres o supera 500.
-- El sistema informa el requisito y el estudiante ajusta el mensaje.
-
-### FE-5 — Materia no permitida para el semestre del estudiante
-
-- **Punto de divergencia:** paso 8.
-- La materia es de un semestre superior al del estudiante.
-- El sistema muestra *«Esa materia no está habilitada para tu semestre.»*
-
-### FE-6 — El tutor no dicta la materia seleccionada
-
-- **Punto de divergencia:** paso 8.
-- El sistema detecta que la materia no está en la oferta del tutor.
-- Se muestra *«El tutor no ofrece esa materia.»*
-
-### FE-7 — Horario fuera del rango permitido
-
-- **Punto de divergencia:** paso 8.
-- La fecha no corresponde a la semana actual o siguiente, el día no coincide con el horario elegido, o la franja ya pasó (incluido el mismo día si la hora de inicio ya transcurrió).
-- El sistema muestra un mensaje acorde (por ejemplo: *«Solo puedes solicitar horarios de la semana actual o la siguiente.»* o *«No puedes solicitar un horario que ya pasó.»*).
-
-### FE-8 — Horario ya reservado
-
-- **Punto de divergencia:** paso 8.
-- Otro estudiante ya tiene una solicitud pendiente o aceptada para ese mismo horario y fecha.
-- El sistema muestra *«Ese horario ya fue solicitado por otro estudiante.»* y el estudiante debe elegir otro bloque.
-
-### FE-9 — Error inesperado al enviar
-
-- **Punto de divergencia:** paso 8.
-- Falla el registro de la solicitud por un problema del sistema.
-- El sistema muestra *«No se pudo enviar la solicitud. Intenta de nuevo.»* y no se crea la solicitud.
+4.2.1. En el paso 4, el mensaje está vacío, tiene menos de 10 caracteres o supera 500.  
+4.2.2. El sistema informa el requisito del mensaje.  
+4.2.3. El flujo regresa al paso 3.
 
 ---
 
-**Caso de uso relacionado:** CU-10 — Responder a una solicitud (cuando el tutor acepta o rechaza).  
-**Caso de uso previo sugerido:** CU-06 — Buscar tutores / CU-07 — Ver perfil de un tutor.
+**Caso de uso previo:** CU-07 — Ver perfil de un tutor.  
+**Caso de uso relacionado:** CU-10 — Responder a una solicitud (cuando el tutor acepta o rechaza).
+
+## Diagrama de casos de uso
+
+```plantuml
+@startuml CU-08-Solicitar-tutoria
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Estudiante" as Estudiante
+actor "Tutor" as Tutor
+
+rectangle OwlShare {
+  usecase "CU-07\nVer perfil de un tutor" as CU07
+  usecase "CU-08\nSolicitar una tutoría" as CU08
+  usecase "CU-10\nResponder a una solicitud" as CU10
+}
+
+Estudiante --> CU07
+Estudiante --> CU08
+Tutor --> CU10
+
+CU08 ..> CU07 : <<precede>>
+CU10 ..> CU08 : <<precede>>
+
+note right of CU08
+  Actor principal: Estudiante
+  El Tutor no interactúa en este CU;
+  la solicitud queda Pendiente
+  hasta CU-10
+end note
+
+note bottom of CU07
+  Precondición de CU-08:
+  el estudiante ya visualiza el perfil
+end note
+
+@enduml
+```
