@@ -9,12 +9,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import modelo.dao.CarreraDAO;
-import modelo.dao.UsuarioDAO;
 import modelo.entities.Carrera;
 import modelo.entities.Estudiante;
 import modelo.entities.Tutor;
 import modelo.entities.Usuario;
 import modelo.services.CatalogoSeeder;
+import modelo.services.UsuarioService;
 import util.EnvLoader;
 
 @WebServlet("/login")
@@ -22,7 +22,7 @@ public class LoginController extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
-	private final UsuarioDAO usuarioDAO = new UsuarioDAO();
+	private final UsuarioService usuarioService = new UsuarioService();
 	private final CarreraDAO carreraDAO = new CarreraDAO();
 
 	static {
@@ -68,7 +68,7 @@ public class LoginController extends HttpServlet {
 	private void asegurarUsuariosPrueba() {
 		try {
 			CatalogoSeeder.asegurarCatalogo();
-			if (usuarioDAO.contar() > 0) {
+			if (usuarioService.contar() > 0) {
 				return;
 			}
 
@@ -81,13 +81,13 @@ public class LoginController extends HttpServlet {
 					"estudiante@epn.edu.ec", "12345678", "Ana", "Pérez");
 			estudiante.setCarrera(software);
 			estudiante.setSemestre(6);
-			usuarioDAO.guardar(estudiante);
+			usuarioService.registrar(estudiante);
 
 			Tutor tutor = new Tutor(
 					"tutor@epn.edu.ec", "12345678", "Luis", "Gómez");
 			tutor.setCarrera(software);
 			tutor.setSemestre(5);
-			usuarioDAO.guardar(tutor);
+			usuarioService.registrar(tutor);
 		} catch (RuntimeException e) {
 			getServletContext().log("No se pudieron crear usuarios de prueba", e);
 		}
@@ -104,7 +104,7 @@ public class LoginController extends HttpServlet {
 			return;
 		}
 
-		Usuario usuario = usuarioDAO.autenticar(email, password);
+		Usuario usuario = usuarioService.autenticar(email, password);
 		if (usuario == null) {
 			req.setAttribute("error", "Credenciales inválidas.");
 			ingresar(req, resp);
