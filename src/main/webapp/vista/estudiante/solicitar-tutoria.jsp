@@ -29,10 +29,10 @@
             border-collapse: collapse;
         }
         #calendarioSemana col.col-hora {
-            width: 12%;
+            width: 14%;
         }
         #calendarioSemana col.col-dia {
-            width: calc(88% / 7);
+            width: calc(86% / 7);
         }
         #calendarioSemana th,
         #calendarioSemana td {
@@ -51,13 +51,13 @@
         .celda-hora {
             display: block;
             width: 100%;
-            padding: 0.25rem 0.15rem;
-            font-size: 0.65rem;
+            padding: 0.25rem 0.1rem;
+            font-size: 0.62rem;
             font-weight: 600;
             color: #454652;
             text-align: center;
-            line-height: 1.25;
-            white-space: normal;
+            line-height: 1.2;
+            white-space: nowrap;
         }
         .slot-cell {
             display: flex;
@@ -421,8 +421,7 @@
         for (var h = HORA_INICIO; h < HORA_FIN; h++) {
             var tr = document.createElement('tr');
             var th = document.createElement('td');
-            th.innerHTML = '<span class="celda-hora">' + formatearHora(h)
-                + '<br/>' + formatearHora(h + 1) + '</span>';
+            th.innerHTML = '<span class="celda-hora">' + formatearHora(h) + ' – ' + formatearHora(h + 1) + '</span>';
             tr.appendChild(th);
 
             columnas.forEach(function (col) {
