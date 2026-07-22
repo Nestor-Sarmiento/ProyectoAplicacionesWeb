@@ -204,6 +204,99 @@ public class SolicitudDAO {
 		}
 	}
 
+	public List<SolicitudTutoria> listarPorEstudiante(Long estudianteId) {
+		if (estudianteId == null) {
+			return List.of();
+		}
+		EntityManager em = JPAUtil.getEntityManager();
+		try {
+			return em.createQuery(
+					"SELECT DISTINCT s FROM SolicitudTutoria s "
+							+ "JOIN FETCH s.tutor "
+							+ "JOIN FETCH s.asignatura "
+							+ "LEFT JOIN FETCH s.disponibilidad "
+							+ "WHERE s.estudiante.id = :estudianteId "
+							+ "ORDER BY s.fechaCreacion DESC",
+					SolicitudTutoria.class)
+					.setParameter("estudianteId", estudianteId)
+					.getResultList();
+		} finally {
+			em.close();
+		}
+	}
+
+	/** Sesiones aceptadas con fecha de hoy en adelante, ordenadas por fecha y hora. */
+	public List<SolicitudTutoria> listarProximasSesionesEstudiante(Long estudianteId) {
+		return listarProximasSesiones(estudianteId, null);
+	}
+
+	public List<SolicitudTutoria> listarProximasSesionesTutor(Long tutorId) {
+		return listarProximasSesiones(null, tutorId);
+	}
+
+	private List<SolicitudTutoria> listarProximasSesiones(Long estudianteId, Long tutorId) {
+		if (estudianteId == null && tutorId == null) {
+			return List.of();
+		}
+		EntityManager em = JPAUtil.getEntityManager();
+		try {
+			String jpql = "SELECT DISTINCT s FROM SolicitudTutoria s "
+					+ "JOIN FETCH s.estudiante "
+					+ "JOIN FETCH s.tutor "
+					+ "JOIN FETCH s.asignatura "
+					+ "LEFT JOIN FETCH s.disponibilidad "
+					+ "WHERE s.estado = :estado "
+					+ "AND s.fechaSesion >= :hoy ";
+			if (estudianteId != null) {
+				jpql += "AND s.estudiante.id = :estudianteId ";
+			}
+			if (tutorId != null) {
+				jpql += "AND s.tutor.id = :tutorId ";
+			}
+			jpql += "ORDER BY s.fechaSesion ASC";
+
+			var query = em.createQuery(jpql, SolicitudTutoria.class)
+					.setParameter("estado", EstadoSolicitud.ACEPTADA)
+					.setParameter("hoy", LocalDate.now());
+			if (estudianteId != null) {
+				query.setParameter("estudianteId", estudianteId);
+			}
+			if (tutorId != null) {
+				query.setParameter("tutorId", tutorId);
+			}
+
+			List<SolicitudTutoria> sesiones = query.getResultList();
+			LocalDate hoy = LocalDate.now();
+			LocalTime ahora = LocalTime.now();
+			return sesiones.stream()
+					.filter(s -> {
+						if (s.getFechaSesion().isAfter(hoy)) {
+							return true;
+						}
+						if (s.getDisponibilidad() == null || s.getDisponibilidad().getHoraFin() == null) {
+							return true;
+						}
+						try {
+							return LocalTime.parse(s.getDisponibilidad().getHoraFin()).isAfter(ahora);
+						} catch (RuntimeException e) {
+							return true;
+						}
+					})
+					.sorted((a, b) -> {
+						int porFecha = a.getFechaSesion().compareTo(b.getFechaSesion());
+						if (porFecha != 0) {
+							return porFecha;
+						}
+						String ha = a.getDisponibilidad() != null ? a.getDisponibilidad().getHoraInicio() : "";
+						String hb = b.getDisponibilidad() != null ? b.getDisponibilidad().getHoraInicio() : "";
+						return ha.compareTo(hb);
+					})
+					.toList();
+		} finally {
+			em.close();
+		}
+	}
+
 	public void actualizarEstado(Long solicitudId, Long tutorId, EstadoSolicitud nuevoEstado) {
 		if (solicitudId == null || tutorId == null || nuevoEstado == null) {
 			throw new IllegalArgumentException("Datos incompletos.");
