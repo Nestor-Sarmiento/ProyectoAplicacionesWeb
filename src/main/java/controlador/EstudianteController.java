@@ -69,6 +69,7 @@ public class EstudianteController extends HttpServlet {
 			case "solicitar-tutoria" -> mostrarSolicitarTutoria(req, resp);
 			case "enviar-solicitud" -> enviarSolicitud(req, resp);
 			case "solicitudes" -> solicitudes(req, resp);
+			case "cancelar-solicitud" -> cancelarSolicitud(req, resp);
 			default -> resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Ruta no encontrada");
 		}
 	}
@@ -95,7 +96,41 @@ public class EstudianteController extends HttpServlet {
 
 		req.setAttribute("estudiante", estudiante);
 		req.setAttribute("solicitudes", solicitudDAO.listarPorEstudiante(estudiante.getId()));
+
+		if ("ok".equals(req.getParameter("mensaje"))) {
+			req.setAttribute("mensaje", "Solicitud cancelada correctamente.");
+		}
+		if (req.getParameter("error") != null && !req.getParameter("error").isBlank()) {
+			req.setAttribute("error", req.getParameter("error"));
+		}
+
 		req.getRequestDispatcher("/vista/estudiante/solicitudes.jsp").forward(req, resp);
+	}
+
+	private void cancelarSolicitud(HttpServletRequest req, HttpServletResponse resp)
+			throws IOException {
+		Estudiante estudiante = requerirEstudiante(req, resp);
+		if (estudiante == null) {
+			return;
+		}
+
+		Long solicitudId = parseLong(req.getParameter("solicitudId"));
+		String redirect = req.getContextPath() + "/estudiante?ruta=solicitudes";
+		if (solicitudId == null) {
+			resp.sendRedirect(redirect + "&error=" + encode("Solicitud inválida."));
+			return;
+		}
+
+		try {
+			solicitudDAO.cancelarPorEstudiante(solicitudId, estudiante.getId());
+			resp.sendRedirect(redirect + "&mensaje=ok");
+		} catch (IllegalArgumentException | IllegalStateException e) {
+			resp.sendRedirect(redirect + "&error=" + encode(e.getMessage()));
+		} catch (RuntimeException e) {
+			getServletContext().log("Error al cancelar solicitud", e);
+			resp.sendRedirect(redirect + "&error="
+					+ encode("No se pudo cancelar la solicitud. Intenta de nuevo."));
+		}
 	}
 
 	private void buscarTutor(HttpServletRequest req, HttpServletResponse resp)

@@ -322,4 +322,60 @@ public class SolicitudDAO {
 			em.close();
 		}
 	}
+
+	/** Estudiante cancela una solicitud pendiente o una sesión aceptada. */
+	public void cancelarPorEstudiante(Long solicitudId, Long estudianteId) {
+		if (solicitudId == null || estudianteId == null) {
+			throw new IllegalArgumentException("Datos incompletos.");
+		}
+		EntityManager em = JPAUtil.getEntityManager();
+		try {
+			em.getTransaction().begin();
+			SolicitudTutoria s = em.find(SolicitudTutoria.class, solicitudId);
+			if (s == null || !s.getEstudiante().getId().equals(estudianteId)) {
+				throw new IllegalArgumentException("Solicitud no encontrada.");
+			}
+			EstadoSolicitud estado = s.getEstado();
+			if (estado != EstadoSolicitud.PENDIENTE && estado != EstadoSolicitud.ACEPTADA) {
+				throw new IllegalStateException(
+						"Solo puedes cancelar solicitudes pendientes o sesiones aceptadas.");
+			}
+			s.setEstado(EstadoSolicitud.CANCELADA);
+			em.getTransaction().commit();
+		} catch (RuntimeException e) {
+			if (em.getTransaction().isActive()) {
+				em.getTransaction().rollback();
+			}
+			throw e;
+		} finally {
+			em.close();
+		}
+	}
+
+	/** Tutor cancela una sesión ya aceptada. */
+	public void cancelarPorTutor(Long solicitudId, Long tutorId) {
+		if (solicitudId == null || tutorId == null) {
+			throw new IllegalArgumentException("Datos incompletos.");
+		}
+		EntityManager em = JPAUtil.getEntityManager();
+		try {
+			em.getTransaction().begin();
+			SolicitudTutoria s = em.find(SolicitudTutoria.class, solicitudId);
+			if (s == null || !s.getTutor().getId().equals(tutorId)) {
+				throw new IllegalArgumentException("Solicitud no encontrada.");
+			}
+			if (s.getEstado() != EstadoSolicitud.ACEPTADA) {
+				throw new IllegalStateException("Solo puedes cancelar sesiones aceptadas.");
+			}
+			s.setEstado(EstadoSolicitud.CANCELADA);
+			em.getTransaction().commit();
+		} catch (RuntimeException e) {
+			if (em.getTransaction().isActive()) {
+				em.getTransaction().rollback();
+			}
+			throw e;
+		} finally {
+			em.close();
+		}
+	}
 }
