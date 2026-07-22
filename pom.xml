@@ -159,12 +159,12 @@
 			<version>${tomcat.version}</version>
 		</dependency>
 
+		<!-- Librería de correo -->
 		<dependency>
 			<groupId>com.sun.mail</groupId>
 			<artifactId>jakarta.mail</artifactId>
 			<version>2.0.1</version>
 		</dependency>
-
 
 		<!-- 1. Hibernate Core (Para Session y Transaction) -->
 		<dependency>
