@@ -2,8 +2,13 @@
 <persistence version="3.0" xmlns="https://jakarta.ee/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
 	<persistence-unit name="OwlShare">
 		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+
+		<class>modelo.entities.Usuario</class>
+		<class>modelo.entities.Estudiante</class>
+		<class>modelo.entities.Tutor</class>
+
 		<properties>
-			<property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/OwlShareBD"/>
+			<property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/OwlShareDB"/>
 			<property name="jakarta.persistence.jdbc.user" value="root"/>
 			<property name="jakarta.persistence.jdbc.password" value=""/>
 			<property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
@@ -12,10 +17,8 @@
 			<property name="eclipselink.ddl-generation" value="drop-and-create-tables" />
 			<property name="eclipselink.ddl-generation" value="none" />
 			-->
-			
-			<property name="eclipselink.ddl-generation" value="create-tables" />
-			
 
+			<property name="eclipselink.ddl-generation" value="create-tables" />
 		</properties>
 	</persistence-unit>
 </persistence>
