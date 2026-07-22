@@ -67,6 +67,10 @@
                     <span id="errorValidacionMsg"></span>
                 </div>
 
+                <p class="text-xs text-on-surface-variant">
+                    Los campos marcados con <span class="text-red-600 font-bold">*</span> son obligatorios.
+                </p>
+
                 <form id="formRegistro"
                       method="post"
                       action="${pageContext.request.contextPath}/registro"
@@ -76,7 +80,9 @@
 
                     <%-- Tipo de cuenta --%>
                     <div class="space-y-3">
-                        <p class="text-xs font-semibold text-primary uppercase tracking-wider">Tipo de cuenta</p>
+                        <p class="text-xs font-semibold text-primary uppercase tracking-wider">
+                            Tipo de cuenta <span class="text-red-600">*</span>
+                        </p>
                         <div class="grid grid-cols-2 gap-3">
                             <label class="cursor-pointer">
                                 <input type="radio" name="tipo" value="ESTUDIANTE" class="peer sr-only" checked>
@@ -102,30 +108,54 @@
                     <%-- Cuenta --%>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="sm:col-span-2 space-y-1.5">
-                            <label class="text-xs font-semibold text-primary uppercase tracking-wider" for="email">Correo</label>
+                            <label class="text-xs font-semibold text-primary uppercase tracking-wider" for="email">
+                                Correo <span class="text-red-600">*</span>
+                            </label>
                             <input id="email" name="email" type="email" required maxlength="254"
                                    placeholder="estudiante@epn.edu.ec"
                                    class="w-full py-3 px-4 bg-surface-container-highest border-none rounded-lg
                                           focus:ring-2 focus:ring-indigo-300 outline-none"/>
                         </div>
                         <div class="space-y-1.5">
-                            <label class="text-xs font-semibold text-primary uppercase tracking-wider" for="password">Contraseña</label>
-                            <input id="password" name="password" type="password" required minlength="8" maxlength="72"
-                                   class="w-full py-3 px-4 bg-surface-container-highest border-none rounded-lg
-                                          focus:ring-2 focus:ring-indigo-300 outline-none"/>
+                            <label class="text-xs font-semibold text-primary uppercase tracking-wider" for="password">
+                                Contraseña <span class="text-red-600">*</span>
+                            </label>
+                            <div class="relative">
+                                <input id="password" name="password" type="password" required minlength="8" maxlength="72"
+                                       placeholder="Mínimo 8 caracteres"
+                                       class="w-full py-3 pl-4 pr-11 bg-surface-container-highest border-none rounded-lg
+                                              focus:ring-2 focus:ring-indigo-300 outline-none"/>
+                                <button type="button" id="togglePassword"
+                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors"
+                                        aria-label="Mostrar u ocultar contraseña">
+                                    <span class="material-symbols-outlined text-sm">visibility</span>
+                                </button>
+                            </div>
                         </div>
                         <div class="space-y-1.5">
-                            <label class="text-xs font-semibold text-primary uppercase tracking-wider" for="passwordConfirm">Confirmar contraseña</label>
-                            <input id="passwordConfirm" name="passwordConfirm" type="password" required minlength="8" maxlength="72"
-                                   class="w-full py-3 px-4 bg-surface-container-highest border-none rounded-lg
-                                          focus:ring-2 focus:ring-indigo-300 outline-none"/>
+                            <label class="text-xs font-semibold text-primary uppercase tracking-wider" for="passwordConfirm">
+                                Confirmar contraseña <span class="text-red-600">*</span>
+                            </label>
+                            <div class="relative">
+                                <input id="passwordConfirm" name="passwordConfirm" type="password" required minlength="8" maxlength="72"
+                                       class="w-full py-3 pl-4 pr-11 bg-surface-container-highest border-none rounded-lg
+                                              focus:ring-2 focus:ring-indigo-300 outline-none"/>
+                                <button type="button" id="togglePasswordConfirm"
+                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors"
+                                        aria-label="Mostrar u ocultar confirmación">
+                                    <span class="material-symbols-outlined text-sm">visibility</span>
+                                </button>
+                            </div>
+                            <p id="msgPasswordMatch" class="hidden text-xs font-medium mt-1"></p>
                         </div>
                     </div>
 
                     <%-- Nombres --%>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="space-y-1.5">
-                            <label class="text-xs font-semibold text-primary uppercase tracking-wider" for="primerNombre">Primer nombre</label>
+                            <label class="text-xs font-semibold text-primary uppercase tracking-wider" for="primerNombre">
+                                Primer nombre <span class="text-red-600">*</span>
+                            </label>
                             <input id="primerNombre" name="primerNombre" type="text" required maxlength="50"
                                    class="w-full py-3 px-4 bg-surface-container-highest border-none rounded-lg
                                           focus:ring-2 focus:ring-indigo-300 outline-none"/>
@@ -139,7 +169,9 @@
                                           focus:ring-2 focus:ring-indigo-300 outline-none"/>
                         </div>
                         <div class="space-y-1.5">
-                            <label class="text-xs font-semibold text-primary uppercase tracking-wider" for="primerApellido">Primer apellido</label>
+                            <label class="text-xs font-semibold text-primary uppercase tracking-wider" for="primerApellido">
+                                Primer apellido <span class="text-red-600">*</span>
+                            </label>
                             <input id="primerApellido" name="primerApellido" type="text" required maxlength="50"
                                    class="w-full py-3 px-4 bg-surface-container-highest border-none rounded-lg
                                           focus:ring-2 focus:ring-indigo-300 outline-none"/>
@@ -157,7 +189,9 @@
                     <%-- Académico --%>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="space-y-1.5">
-                            <label class="text-xs font-semibold text-primary uppercase tracking-wider" for="carreraId">Carrera</label>
+                            <label class="text-xs font-semibold text-primary uppercase tracking-wider" for="carreraId">
+                                Carrera <span class="text-red-600">*</span>
+                            </label>
                             <select id="carreraId" name="carreraId" required
                                     class="w-full py-3 px-4 bg-surface-container-highest border-none rounded-lg
                                            focus:ring-2 focus:ring-indigo-300 outline-none">
@@ -168,7 +202,9 @@
                             </select>
                         </div>
                         <div class="space-y-1.5">
-                            <label class="text-xs font-semibold text-primary uppercase tracking-wider" for="semestre">Semestre</label>
+                            <label class="text-xs font-semibold text-primary uppercase tracking-wider" for="semestre">
+                                Semestre <span class="text-red-600">*</span>
+                            </label>
                             <select id="semestre" name="semestre" required
                                     class="w-full py-3 px-4 bg-surface-container-highest border-none rounded-lg
                                            focus:ring-2 focus:ring-indigo-300 outline-none">
@@ -179,10 +215,12 @@
                     <%-- Materias tutor --%>
                     <section id="seccionMaterias" class="hidden space-y-3">
                         <div>
-                            <h2 class="text-sm font-bold text-primary uppercase tracking-wider">Materias a dictar</h2>
+                            <h2 class="text-sm font-bold text-primary uppercase tracking-wider">
+                                Materias a dictar <span class="text-red-600">*</span>
+                            </h2>
                             <p class="text-xs text-on-surface-variant mt-1">
                                 Solo puedes elegir materias ya cursadas (semestres anteriores al tuyo).
-                                Marca las que deseas ofrecer en tutorías.
+                                Marca al menos una materia.
                             </p>
                         </div>
                         <div id="materiasContainer"
@@ -235,6 +273,55 @@
     var form = document.getElementById('formRegistro');
     var errorBox = document.getElementById('errorValidacion');
     var errorMsg = document.getElementById('errorValidacionMsg');
+    var passwordInput = document.getElementById('password');
+    var passwordConfirmInput = document.getElementById('passwordConfirm');
+    var msgPasswordMatch = document.getElementById('msgPasswordMatch');
+
+    function configurarToggle(btnId, input) {
+        var btn = document.getElementById(btnId);
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            var icon = this.querySelector('.material-symbols-outlined');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = 'visibility_off';
+            } else {
+                input.type = 'password';
+                icon.textContent = 'visibility';
+            }
+        });
+    }
+
+    function verificarPasswordMatch() {
+        var password = passwordInput.value;
+        var confirm = passwordConfirmInput.value;
+
+        if (!confirm) {
+            msgPasswordMatch.classList.add('hidden');
+            passwordConfirmInput.classList.remove('ring-2', 'ring-red-300', 'ring-green-300');
+            return password.length === 0 || password.length >= 8;
+        }
+
+        msgPasswordMatch.classList.remove('hidden');
+        if (password !== confirm) {
+            msgPasswordMatch.textContent = 'Las contraseñas no coinciden.';
+            msgPasswordMatch.className = 'text-xs font-medium mt-1 text-red-600';
+            passwordConfirmInput.classList.remove('ring-green-300');
+            passwordConfirmInput.classList.add('ring-2', 'ring-red-300');
+            return false;
+        }
+
+        msgPasswordMatch.textContent = 'Las contraseñas coinciden.';
+        msgPasswordMatch.className = 'text-xs font-medium mt-1 text-green-600';
+        passwordConfirmInput.classList.remove('ring-red-300');
+        passwordConfirmInput.classList.add('ring-2', 'ring-green-300');
+        return true;
+    }
+
+    configurarToggle('togglePassword', passwordInput);
+    configurarToggle('togglePasswordConfirm', passwordConfirmInput);
+    passwordInput.addEventListener('input', verificarPasswordMatch);
+    passwordConfirmInput.addEventListener('input', verificarPasswordMatch);
 
     function tipoActual() {
         var checked = document.querySelector('input[name="tipo"]:checked');
@@ -329,12 +416,15 @@
     form.addEventListener('submit', function (e) {
         var mensaje = null;
         var email = document.getElementById('email').value.trim();
-        var password = document.getElementById('password').value;
-        var confirm = document.getElementById('passwordConfirm').value;
+        var password = passwordInput.value;
+        var confirm = passwordConfirmInput.value;
+        var coinciden = verificarPasswordMatch();
 
         if (!email) mensaje = 'El correo es obligatorio.';
+        else if (!password) mensaje = 'La contraseña es obligatoria.';
         else if (password.length < 8) mensaje = 'La contraseña debe tener al menos 8 caracteres.';
-        else if (password !== confirm) mensaje = 'Las contraseñas no coinciden.';
+        else if (!confirm) mensaje = 'Debes confirmar la contraseña.';
+        else if (!coinciden || password !== confirm) mensaje = 'Las contraseñas no coinciden.';
         else if (!document.getElementById('primerNombre').value.trim()) mensaje = 'El primer nombre es obligatorio.';
         else if (!document.getElementById('primerApellido').value.trim()) mensaje = 'El primer apellido es obligatorio.';
         else if (!carreraSelect.value) mensaje = 'Selecciona una carrera.';

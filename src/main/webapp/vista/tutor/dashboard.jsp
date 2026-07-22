@@ -85,12 +85,30 @@
                 </span>
             </a>
 
-            <a href="${pageContext.request.contextPath}/tutor?ruta=solicitudes"
+            <a href="${pageContext.request.contextPath}/tutor?ruta=materias"
                class="group block bg-surface-container-lowest rounded-xl p-8
                       shadow-[0_20px_40px_rgba(25,28,30,0.08)]
                       hover:ring-2 hover:ring-primary/20 transition-all">
                 <div class="flex items-center gap-3 mb-4">
-                    <span class="material-symbols-outlined text-secondary text-3xl">mail_outline</span>
+                    <span class="material-symbols-outlined text-secondary text-3xl">menu_book</span>
+                    <h2 class="text-2xl font-extrabold text-primary"
+                        style="font-family:'Manrope',sans-serif">Materias</h2>
+                </div>
+                <p class="text-on-surface-variant text-sm mb-6">
+                    Elige o actualiza las materias en las que dictas tutorías.
+                </p>
+                <span class="inline-flex items-center gap-2 text-primary font-bold text-sm group-hover:gap-3 transition-all">
+                    Editar materias
+                    <span class="material-symbols-outlined text-base">arrow_forward</span>
+                </span>
+            </a>
+
+            <a href="${pageContext.request.contextPath}/tutor?ruta=solicitudes"
+               class="group block bg-surface-container-lowest rounded-xl p-8
+                      shadow-[0_20px_40px_rgba(25,28,30,0.08)]
+                      hover:ring-2 hover:ring-primary/20 transition-all md:col-span-2">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="material-symbols-outlined text-primary text-3xl">mail_outline</span>
                     <h2 class="text-2xl font-extrabold text-primary"
                         style="font-family:'Manrope',sans-serif">Solicitudes</h2>
                 </div>
@@ -103,6 +121,46 @@
                 </span>
             </a>
         </div>
+
+        <section class="bg-surface-container-lowest rounded-xl p-8 mb-10
+                        shadow-[0_20px_40px_rgba(25,28,30,0.08)]">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+                <h2 class="text-xl font-extrabold text-on-surface flex items-center gap-2"
+                    style="font-family:'Manrope',sans-serif">
+                    <span class="material-symbols-outlined text-primary">auto_stories</span>
+                    Mis materias
+                </h2>
+                <a href="${pageContext.request.contextPath}/tutor?ruta=materias"
+                   class="text-sm font-bold text-primary hover:underline inline-flex items-center gap-1">
+                    Editar
+                    <span class="material-symbols-outlined text-sm">edit</span>
+                </a>
+            </div>
+
+            <c:choose>
+                <c:when test="${not empty materiasTutor}">
+                    <div class="flex flex-wrap gap-2">
+                        <c:forEach var="materia" items="${materiasTutor}">
+                            <span class="inline-flex flex-col bg-surface-container-low rounded-lg px-3 py-2">
+                                <span class="text-[10px] font-bold uppercase tracking-wide text-outline">
+                                    <c:out value="${materia.codigo}"/>
+                                </span>
+                                <span class="text-xs font-semibold text-on-surface">
+                                    <c:out value="${materia.nombre}"/>
+                                </span>
+                            </span>
+                        </c:forEach>
+                    </div>
+                </c:when>
+                <c:otherwise>
+                    <p class="text-on-surface-variant text-sm text-center py-4">
+                        Aún no has seleccionado materias.
+                        <a href="${pageContext.request.contextPath}/tutor?ruta=materias"
+                           class="text-primary font-bold hover:underline">Agrégalas aquí</a>.
+                    </p>
+                </c:otherwise>
+            </c:choose>
+        </section>
 
         <section class="bg-surface-container-lowest rounded-xl p-8
                         shadow-[0_20px_40px_rgba(25,28,30,0.08)]">
