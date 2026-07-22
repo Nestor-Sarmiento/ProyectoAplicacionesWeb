@@ -45,6 +45,7 @@ public class LoginController extends HttpServlet {
 			case "ingresar" -> ingresar(req, resp);
 			case "login" -> login(req, resp);
 			case "home" -> home(req, resp);
+			case "logout" -> logout(req, resp);
 			default -> resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Ruta no encontrada");
 		}
 	}
@@ -98,7 +99,13 @@ public class LoginController extends HttpServlet {
 		HttpSession session = req.getSession(true);
 		session.setAttribute("usuario", usuario);
 
-		resp.sendRedirect(req.getContextPath() + "/login?ruta=home");
+		if (usuario instanceof Estudiante) {
+			resp.sendRedirect(req.getContextPath() + "/estudiante?ruta=inicio");
+		} else if (usuario instanceof Tutor) {
+			resp.sendRedirect(req.getContextPath() + "/login?ruta=home");
+		} else {
+			resp.sendRedirect(req.getContextPath() + "/login?ruta=home");
+		}
 	}
 
 	private void home(HttpServletRequest req, HttpServletResponse resp)
@@ -111,17 +118,28 @@ public class LoginController extends HttpServlet {
 			return;
 		}
 
+		if (usuario instanceof Estudiante) {
+			resp.sendRedirect(req.getContextPath() + "/estudiante?ruta=inicio");
+			return;
+		}
+
 		req.setAttribute("usuario", usuario);
 
-		if (usuario instanceof Estudiante) {
-			req.setAttribute("tipoUsuario", "Estudiante");
-		} else if (usuario instanceof Tutor) {
+		if (usuario instanceof Tutor) {
 			req.setAttribute("tipoUsuario", "Tutor");
 		} else {
 			req.setAttribute("tipoUsuario", "Usuario");
 		}
 
 		req.getRequestDispatcher("/vista/home.jsp").forward(req, resp);
+	}
+
+	private void logout(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		HttpSession session = req.getSession(false);
+		if (session != null) {
+			session.invalidate();
+		}
+		resp.sendRedirect(req.getContextPath() + "/login?ruta=ingresar");
 	}
 
 	private String trim(String value) {
