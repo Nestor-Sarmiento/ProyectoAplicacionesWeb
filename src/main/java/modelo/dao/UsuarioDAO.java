@@ -13,6 +13,7 @@ import modelo.entities.Carrera;
 import modelo.entities.Estudiante;
 import modelo.entities.Tutor;
 import modelo.entities.Usuario;
+import util.PasswordHasher;
 
 public class UsuarioDAO {
 
@@ -32,9 +33,26 @@ public class UsuarioDAO {
 			if (!usuario.isActivo()) {
 				return null;
 			}
-			return password.equals(usuario.getPassword()) ? usuario : null;
+			if (!PasswordHasher.coincide(password, usuario.getPassword())) {
+				return null;
+			}
+
+			// Migrar contraseñas en texto plano al primer login correcto
+			if (!PasswordHasher.esHash(usuario.getPassword())) {
+				em.getTransaction().begin();
+				usuario.setPassword(PasswordHasher.hash(password));
+				em.merge(usuario);
+				em.getTransaction().commit();
+			}
+
+			return usuario;
 		} catch (NoResultException e) {
 			return null;
+		} catch (RuntimeException e) {
+			if (em.getTransaction().isActive()) {
+				em.getTransaction().rollback();
+			}
+			throw e;
 		} finally {
 			em.close();
 		}
@@ -82,6 +100,16 @@ public class UsuarioDAO {
 	}
 
 	public void guardar(Usuario usuario) {
+		if (usuario == null) {
+			throw new IllegalArgumentException("El usuario es obligatorio.");
+		}
+		if (usuario.getPassword() == null || usuario.getPassword().isBlank()) {
+			throw new IllegalArgumentException("La contraseña es obligatoria.");
+		}
+		if (!PasswordHasher.esHash(usuario.getPassword())) {
+			usuario.setPassword(PasswordHasher.hash(usuario.getPassword()));
+		}
+
 		EntityManager em = JPAUtil.getEntityManager();
 		try {
 			em.getTransaction().begin();
