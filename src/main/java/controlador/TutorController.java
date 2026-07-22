@@ -63,6 +63,7 @@ public class TutorController extends HttpServlet {
 			case "guardar-materias" -> guardarMaterias(req, resp);
 			case "solicitudes" -> solicitudes(req, resp);
 			case "responder-solicitud" -> responderSolicitud(req, resp);
+			case "cancelar-solicitud" -> cancelarSolicitud(req, resp);
 			default -> resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Ruta no encontrada");
 		}
 	}
@@ -281,6 +282,46 @@ public class TutorController extends HttpServlet {
 			getServletContext().log("Error al responder solicitud", e);
 			resp.sendRedirect(req.getContextPath() + "/tutor?ruta=solicitudes&error="
 					+ java.net.URLEncoder.encode("No se pudo actualizar la solicitud.",
+							java.nio.charset.StandardCharsets.UTF_8));
+		}
+	}
+
+	private void cancelarSolicitud(HttpServletRequest req, HttpServletResponse resp)
+			throws IOException {
+		Tutor tutor = requerirTutor(req, resp);
+		if (tutor == null) {
+			return;
+		}
+
+		Long solicitudId = null;
+		String idRaw = req.getParameter("solicitudId");
+		if (idRaw != null && !idRaw.isBlank()) {
+			try {
+				solicitudId = Long.valueOf(idRaw.trim());
+			} catch (NumberFormatException ignored) {
+				solicitudId = null;
+			}
+		}
+
+		String redirect = req.getContextPath() + "/tutor?ruta=solicitudes";
+		if (solicitudId == null) {
+			resp.sendRedirect(redirect + "&error="
+					+ java.net.URLEncoder.encode("Solicitud inválida.",
+							java.nio.charset.StandardCharsets.UTF_8));
+			return;
+		}
+
+		try {
+			solicitudDAO.cancelarPorTutor(solicitudId, tutor.getId());
+			resp.sendRedirect(redirect + "&mensaje=ok");
+		} catch (IllegalArgumentException | IllegalStateException e) {
+			resp.sendRedirect(redirect + "&error="
+					+ java.net.URLEncoder.encode(e.getMessage(),
+							java.nio.charset.StandardCharsets.UTF_8));
+		} catch (RuntimeException e) {
+			getServletContext().log("Error al cancelar sesión", e);
+			resp.sendRedirect(redirect + "&error="
+					+ java.net.URLEncoder.encode("No se pudo cancelar la sesión.",
 							java.nio.charset.StandardCharsets.UTF_8));
 		}
 	}
